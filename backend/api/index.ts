@@ -1,36 +1,56 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { createApp } from "../src/app";
-import { sweepQuietly } from "../src/lib/reservations";
-import { loadActiveDisk } from "../src/lib/storage";
-
 /**
  * Vercel entry point.
  *
- * `index.ts` (the VPS entry) owns a port, a sweep timer and signal handlers.
- * None of those exist here: Vercel gives the function a request and takes the
- * instance away again, so this file is the same app with the process-shaped
- * parts removed.
+ * `src/index.ts` (the VPS entry) owns a port, a sweep timer and signal
+ * handlers. None of those exist here: Vercel gives the function a request and
+ * takes the instance away again, so this file is the same app with the
+ * process-shaped parts removed.
  */
 
-const app = createApp();
+type Handler = (req: IncomingMessage, res: ServerResponse) => void;
+
+type Runtime = { app: Handler; sweep: () => Promise<void> };
+
+let runtime: Promise<Runtime> | null = null;
 
 /**
- * The one piece of boot work that cannot be skipped.
+ * The app is imported dynamically, and that is deliberate.
  *
- * `getActiveDisk()` starts at the MEDIA_DRIVER value and is only corrected once
- * `loadActiveDisk` has read the stored override. Skip it and every upload on a
- * cold instance goes to whatever .env said — on Vercel that means writing to a
- * read-only filesystem and losing the file. Memoised, so it costs one query per
- * instance and nothing thereafter.
+ * `env.ts` throws while it is being imported when a required variable is
+ * missing, which is the right behaviour — but a top-level `import` of it makes
+ * that throw happen before any code here runs, and the only thing Vercel can
+ * say about a module that failed to load is FUNCTION_INVOCATION_FAILED. Pulling
+ * it in from inside a function turns the same error into a response that names
+ * the variable, which is the difference between a five-minute fix and an
+ * afternoon.
+ *
+ * `loadActiveDisk` is awaited for a different reason: `getActiveDisk()` answers
+ * with the MEDIA_DRIVER value until the stored override has been read, so a
+ * request served before it lands could write an upload to the wrong disk. On
+ * Vercel that means a read-only filesystem and a lost file. Memoised, so it is
+ * one query per instance.
  */
-let ready: Promise<void> | null = null;
+function boot(): Promise<Runtime> {
+  runtime ??= (async (): Promise<Runtime> => {
+    // The `.js` extensions are required by `moduleResolution: nodenext` for a
+    // dynamic import, and are correct at runtime in both builds: tsc emits
+    // these files as .js, and esbuild resolves a .js specifier to its .ts
+    // source when bundling TypeScript.
+    const { createApp } = await import("../src/app.js");
+    const { loadActiveDisk } = await import("../src/lib/storage.js");
+    const { sweepQuietly } = await import("../src/lib/reservations.js");
 
-function whenReady(): Promise<void> {
-  // loadActiveDisk swallows its own errors and falls back to MEDIA_DRIVER, so
-  // this never rejects and never needs re-trying.
-  ready ??= loadActiveDisk();
-  return ready;
+    const app = createApp() as unknown as Handler;
+    // Swallows its own errors and falls back to MEDIA_DRIVER, so this settles
+    // even when the database is unreachable.
+    await loadActiveDisk();
+
+    return { app, sweep: sweepQuietly };
+  })();
+
+  return runtime;
 }
 
 /**
@@ -46,18 +66,38 @@ function whenReady(): Promise<void> {
 const SWEEP_INTERVAL_MS = 5 * 60_000;
 let lastSweep = 0;
 
-function maybeSweep(): void {
+function maybeSweep(sweep: () => Promise<void>): void {
   const now = Date.now();
   if (now - lastSweep < SWEEP_INTERVAL_MS) return;
   lastSweep = now;
-  void sweepQuietly();
+  void sweep();
 }
 
 export default async function handler(
   req: IncomingMessage,
   res: ServerResponse
 ): Promise<void> {
-  await whenReady();
-  maybeSweep();
-  app(req as never, res as never);
+  let ready: Runtime;
+
+  try {
+    ready = await boot();
+  } catch (error) {
+    // Cleared so the next request retries rather than serving a cached failure
+    // for the life of the instance.
+    runtime = null;
+
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("The API failed to start:", error);
+
+    res.statusCode = 500;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    // The message names a missing environment variable, never its value. That
+    // is worth saying out loud on a deployment that cannot serve a request
+    // without it.
+    res.end(JSON.stringify({ error: "The API is not configured correctly.", detail }));
+    return;
+  }
+
+  maybeSweep(ready.sweep);
+  ready.app(req, res);
 }
