@@ -16,7 +16,9 @@
   "scripts": {
     "start:build": "tsc -w",
     "start:run": "nodemon dist/index.js",
-    "dev": "concurrently npm:start:*",
+   "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
+
+   
     "mail:test": "tsc && node dist/mail-test.js",
     "make:admin": "tsc && node dist/make-admin.js",
     "set:password": "tsc && node dist/set-password.js",
@@ -24,6 +26,9 @@
     "seed:home": "tsc && node dist/seed-home.js",
     "media:migrate": "tsc && node dist/migrate-media-local.js",
 
+
+    
+     "start": "node dist/index.js",
     "build": "prisma generate && tsc",
     "postinstall": "prisma generate"
   },
