@@ -1,0 +1,46 @@
+# ── Secrets ────────────────────────────────────────────────────────────────
+# Real credentials live only on the machine that needs them. The .example and
+# the instruction doc are safe to publish and are re-included below.
+.env
+.env.*
+!.env.example
+!.env-instruction.md
+
+# ── Dependencies ───────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.*
+
+# ── Build output ───────────────────────────────────────────────────────────
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# ── Uploaded media ─────────────────────────────────────────────────────────
+# User data, not source. There is no second copy since ImageKit was removed —
+# back this directory up separately rather than committing it.
+backend/media/
+
+# ── Local tooling ──────────────────────────────────────────────────────────
+.claude/settings.local.json
+.playwright-mcp/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ── Editor / OS ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.pem
+
+# ── Scratch ────────────────────────────────────────────────────────────────
+signup-desktop.png
+*.local
