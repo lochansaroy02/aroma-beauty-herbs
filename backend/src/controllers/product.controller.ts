@@ -262,7 +262,7 @@ export async function createProduct(req: Request, res: Response) {
     });
 
     if (clash) {
-      await deleteMediaFiles(uploaded.map((image) => image.file_id));
+      await deleteMediaFiles(uploaded);
       throw new HttpError(422, "Validation failed", {
         sku: ["Already used by another product"],
       });
@@ -358,7 +358,7 @@ export async function createProduct(req: Request, res: Response) {
     return res.status(201).json({ product: toProductPayload(full, images) });
   } catch (error) {
     // The files are already in local media storage but nothing now points at them.
-    await deleteMediaFiles(uploaded.map((image) => image.file_id));
+    await deleteMediaFiles(uploaded);
 
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const target = String((error.meta as { target?: unknown })?.target ?? "");
@@ -471,7 +471,7 @@ export async function attachProductImages(req: Request, res: Response) {
     product = await findProductForAdmin(req.params["id"]);
   } catch (error) {
     // Nothing will ever reference these, so don't leave them in the library.
-    await deleteMediaFiles(images.map((image) => image.file_id));
+    await deleteMediaFiles(images);
     throw error;
   }
 
@@ -481,11 +481,11 @@ export async function attachProductImages(req: Request, res: Response) {
       model_id: product.id,
       collection_name: collection,
     },
-    select: { id: true, custom_properties: true },
+    select: { id: true, disk: true, custom_properties: true },
   });
 
   if (!isMain && existing.length + images.length > MAX_GALLERY_IMAGES) {
-    await deleteMediaFiles(images.map((image) => image.file_id));
+    await deleteMediaFiles(images);
     throw new HttpError(422, "Validation failed", {
       images: [`A product can have at most ${MAX_GALLERY_IMAGES} gallery images`],
     });
@@ -522,7 +522,7 @@ export async function attachProductImages(req: Request, res: Response) {
 
     return res.status(201).json({ images: created.map(toMediaPayload) });
   } catch (error) {
-    await deleteMediaFiles(images.map((image) => image.file_id));
+    await deleteMediaFiles(images);
     throw error;
   }
 }
@@ -542,7 +542,7 @@ export async function deleteProductImage(req: Request, res: Response) {
       model_type: PRODUCT_MODEL_TYPE,
       model_id: product.id,
     },
-    select: { id: true, custom_properties: true },
+    select: { id: true, disk: true, custom_properties: true },
   });
 
   if (!media) {

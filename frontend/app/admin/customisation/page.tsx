@@ -2,6 +2,7 @@ import { AlertCircleIcon, ExternalLinkIcon, FilmIcon } from "lucide-react";
 import Link from "next/link";
 
 import { AnnouncementEditor } from "@/components/admin/customisation/announcement-editor";
+import { MediaDriverToggle } from "@/components/admin/customisation/media-driver-toggle";
 import { SectionArranger } from "@/components/admin/customisation/section-arranger";
 import { StripEditor } from "@/components/admin/customisation/strip-editor";
 import { TileEditor } from "@/components/admin/customisation/tile-editor";
@@ -9,11 +10,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchAdminHome } from "@/lib/admin-home";
+import { fetchMediaSettings } from "@/lib/admin-settings";
 
 export const metadata = { title: "Customisation — Aroma Admin" };
 
 export default async function CustomisationPage() {
-  const result = await fetchAdminHome();
+  const [result, media] = await Promise.all([fetchAdminHome(), fetchMediaSettings()]);
 
   if (!result.ok) {
     return (
@@ -34,6 +36,7 @@ export default async function CustomisationPage() {
       <Header />
 
       <SectionArranger sections={home.sections} />
+      {media.ok ? <MediaDriverToggle settings={media.data} /> : null}
       <AnnouncementEditor announcement={home.announcement} />
       <StripEditor strips={home.strips} />
       <TileEditor tiles={home.tiles} />

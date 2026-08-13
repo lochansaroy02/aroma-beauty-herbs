@@ -10,6 +10,10 @@ import {
   listAdminProducts,
   updateProduct,
 } from "../controllers/admin-product.controller";
+import {
+  getMediaSettings,
+  updateMediaSettings,
+} from "../controllers/admin-settings.controller";
 import { getOrderStats } from "../controllers/admin-stats.controller";
 import {
   createStrip,
@@ -49,6 +53,10 @@ adminRouter.use(requireAuth, requireAdmin);
 // Before /orders/:orderNumber would otherwise be a candidate — this is a
 // distinct resource, not an order number.
 adminRouter.get("/stats/orders", getOrderStats);
+
+// Runtime switches — currently just which storage new uploads go to.
+adminRouter.get("/settings/media", getMediaSettings);
+adminRouter.patch("/settings/media", updateMediaSettings);
 
 // Homepage customisation: the announcement bar, scrolling strips, closing grid,
 // and how the blocks are arranged. The hero video keeps its own /videos routes.

@@ -1,16 +1,22 @@
 import type { NextConfig } from "next";
 
 /**
- * Media is served by our own API off its local disk, at
- * `${MEDIA_BASE_URL}/media/...`. next/image refuses any host not listed here,
- * so this has to track wherever the API is reachable — set MEDIA_BASE_URL to
- * the public origin (https://api.yourdomain.com, or the domain nginx serves
- * /media from) when you move to the VPS.
+ * next/image refuses any host not listed here, and this app can serve media
+ * from two places at once: our own API (MEDIA_DRIVER=local) and ImageKit
+ * (MEDIA_DRIVER=imagekit). Existing rows keep the disk they were uploaded to,
+ * so after a driver switch BOTH hosts appear on the same page — hence both are
+ * always allowed rather than one being chosen by the current driver.
  */
 const mediaBase =
   process.env.MEDIA_BASE_URL ?? process.env.API_URL ?? "http://localhost:4000";
 
 const { protocol, hostname, port } = new URL(mediaBase);
+
+/** Defaults to every ik.imagekit.io account; set it for a custom domain. */
+const imageKitEndpoint =
+  process.env.IMAGEKIT_URL_ENDPOINT ?? "https://ik.imagekit.io";
+
+const imageKit = new URL(imageKitEndpoint);
 
 /**
  * Next 16 refuses to optimise images from a private IP unless told otherwise —
@@ -36,6 +42,11 @@ const nextConfig: NextConfig = {
         hostname,
         ...(port ? { port } : {}),
         pathname: "/media/**",
+      },
+      {
+        protocol: imageKit.protocol.replace(":", "") as "http" | "https",
+        hostname: imageKit.hostname,
+        pathname: "/**",
       },
     ],
     ...(isLocalHost ? { dangerouslyAllowLocalIP: true } : {}),

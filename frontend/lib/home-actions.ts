@@ -67,6 +67,11 @@ export type TileImageInput = {
   name: string;
   size: number;
   mime_type?: string;
+  /** Which storage the API wrote it to; recorded on the media row. */
+  disk?: string;
+  thumbnail_url?: string;
+  width?: number;
+  height?: number;
 };
 
 export type TileInput = {

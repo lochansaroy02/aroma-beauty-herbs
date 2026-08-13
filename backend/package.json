@@ -22,7 +22,11 @@
     "set:password": "tsc && node dist/set-password.js",
     "orders:sweep": "tsc && node dist/release-expired.js",
     "seed:home": "tsc && node dist/seed-home.js",
-    "media:migrate": "tsc && node dist/migrate-media-local.js"
+    "media:migrate": "tsc && node dist/migrate-media-local.js",
+
+    "build": "prisma generate && tsc",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && tsc"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +41,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",

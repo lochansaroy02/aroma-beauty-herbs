@@ -5,52 +5,32 @@ import path from "node:path";
 import { env } from "./env";
 
 /**
- * Local media storage.
+ * The local-disk driver.
  *
  * Files live under MEDIA_ROOT and are served back at `${MEDIA_BASE_URL}/media`,
  * so a file stored at `<root>/videos/facial.mp4` is fetched from
  * `http://host:port/media/videos/facial.mp4`. The database stores only the
  * relative path (`/videos/facial.mp4`), which means moving the disk or putting
  * a real domain in front is a change to MEDIA_BASE_URL and nothing else.
+ *
+ * Selected with MEDIA_DRIVER=local. Dispatched from `storage.ts` — import that,
+ * not this, so a row on the other disk still resolves correctly.
  */
 
-/** Where uploads are filed, mirrored in the URL. */
-export const PRODUCT_FOLDER = "/products";
-export const VIDEO_FOLDER = "/videos";
-
-/** The URL prefix the static handler is mounted on. */
-export const MEDIA_URL_PREFIX = "/media";
-
-/** Folders a caller may write into — anything else is rejected outright. */
-const ALLOWED_FOLDERS = new Set([PRODUCT_FOLDER, VIDEO_FOLDER]);
-
-/**
- * Only these ever reach disk. The browser's declared MIME type is not evidence
- * of anything, so the extension is derived from this map rather than from the
- * uploaded filename — that is what stops `payload.php` being written as-is.
- */
-const EXTENSIONS: Record<string, string> = {
-  "image/jpeg": ".jpg",
-  "image/png": ".png",
-  "image/webp": ".webp",
-  "image/avif": ".avif",
-  "image/gif": ".gif",
-  "video/mp4": ".mp4",
-  "video/webm": ".webm",
-  "video/quicktime": ".mov",
-};
-
-export function isAllowedMime(mime: string): boolean {
-  return Object.prototype.hasOwnProperty.call(EXTENSIONS, mime);
-}
-
-export const ALLOWED_MIME_TYPES = Object.keys(EXTENSIONS);
+import {
+  ALLOWED_FOLDERS,
+  EXTENSIONS,
+  LOCAL_DISK,
+  MEDIA_URL_PREFIX,
+  slugifyName,
+  type StoredFile,
+} from "./storage-shared";
 
 /** Absolute path of the media directory. Relative values resolve from cwd. */
 export const MEDIA_ROOT = path.resolve(env.MEDIA_ROOT);
 
 /** Public URL for a stored path, e.g. "/videos/facial.mp4". */
-export function mediaUrl(filePath: string): string {
+export function localUrl(filePath: string): string {
   const relative = filePath.startsWith("/") ? filePath : `/${filePath}`;
   return `${env.MEDIA_BASE_URL}${MEDIA_URL_PREFIX}${relative}`;
 }
@@ -74,37 +54,13 @@ export function resolveMediaPath(filePath: string): string | null {
 }
 
 /**
- * A filesystem-safe stem from the uploaded name, kept only so files stay
- * recognisable when someone lists the directory over SSH. Uniqueness comes from
- * the random suffix, never from this.
- */
-function slugifyName(original: string): string {
-  const stem = path
-    .basename(original, path.extname(original))
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
-
-  return stem || "file";
-}
-
-export type StoredFile = {
-  /** Relative path, which doubles as the id used to delete it later. */
-  file_path: string;
-  name: string;
-  size: number;
-  mime_type: string;
-};
-
-/**
  * Writes one uploaded buffer into `folder` and returns its descriptor.
  *
  * The name always gets a random suffix: "front.jpg" collides constantly across
  * products, and silently overwriting someone else's image would be far worse
  * than an ugly filename.
  */
-export async function saveUpload(input: {
+export async function saveLocalUpload(input: {
   buffer: Buffer;
   originalName: string;
   mimeType: string;
@@ -132,9 +88,12 @@ export async function saveUpload(input: {
 
   return {
     file_path: relative,
+    // On local storage the path is the identity — there is no separate handle.
+    file_id: relative,
     name: input.originalName,
     size: input.buffer.byteLength,
     mime_type: input.mimeType,
+    disk: LOCAL_DISK,
   };
 }
 
@@ -145,7 +104,7 @@ export async function saveUpload(input: {
  * failed, so a failure here must not mask the original error — an orphaned file
  * on disk is the lesser problem.
  */
-export async function deleteMediaFiles(filePaths: string[]): Promise<void> {
+export async function deleteLocalFiles(filePaths: string[]): Promise<void> {
   for (const filePath of filePaths.filter(Boolean)) {
     const absolute = resolveMediaPath(filePath);
 
@@ -170,7 +129,7 @@ export async function deleteMediaFiles(filePaths: string[]): Promise<void> {
 export async function ensureMediaRoot(): Promise<void> {
   try {
     await mkdir(MEDIA_ROOT, { recursive: true });
-    console.log(`Media root ready at ${MEDIA_ROOT} (served from ${mediaUrl("")})`);
+    console.log(`Media root ready at ${MEDIA_ROOT} (served from ${localUrl("")})`);
   } catch (error) {
     console.error(`Could not create the media root at ${MEDIA_ROOT}:`, error);
   }

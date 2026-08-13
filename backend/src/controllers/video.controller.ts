@@ -195,7 +195,7 @@ export async function createVideo(req: Request, res: Response) {
     await assertProductExists(input.product_id);
   } catch (error) {
     // Nothing will reference the upload, so don't leave it in the library.
-    await deleteMediaFiles([input.video.file_id]);
+    await deleteMediaFiles([input.video]);
     throw error;
   }
 
@@ -223,7 +223,7 @@ export async function createVideo(req: Request, res: Response) {
 
     return res.status(201).json({ video: await loadVideo(created.id) });
   } catch (error) {
-    await deleteMediaFiles([input.video.file_id]);
+    await deleteMediaFiles([input.video]);
     throw error;
   }
 }
@@ -248,7 +248,7 @@ export async function updateVideo(req: Request, res: Response) {
   });
 
   if (!existing) {
-    if (input.video) await deleteMediaFiles([input.video.file_id]);
+    if (input.video) await deleteMediaFiles([input.video]);
     throw new HttpError(404, "Video not found");
   }
 
@@ -264,7 +264,7 @@ export async function updateVideo(req: Request, res: Response) {
           model_id: id,
           collection_name: VIDEO_COLLECTION,
         },
-        select: { id: true, custom_properties: true },
+        select: { id: true, disk: true, custom_properties: true },
       })
     : [];
 
@@ -297,7 +297,7 @@ export async function updateVideo(req: Request, res: Response) {
       }
     });
   } catch (error) {
-    if (input.video) await deleteMediaFiles([input.video.file_id]);
+    if (input.video) await deleteMediaFiles([input.video]);
     throw error;
   }
 
@@ -328,7 +328,7 @@ export async function deleteVideo(req: Request, res: Response) {
       model_id: id,
       collection_name: VIDEO_COLLECTION,
     },
-    select: { id: true, custom_properties: true },
+    select: { id: true, disk: true, custom_properties: true },
   });
 
   await prisma.$transaction(async (tx) => {

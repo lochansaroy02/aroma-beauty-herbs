@@ -12,8 +12,14 @@ export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
  * can't be filed as a video.
  */
 export const uploadedVideoSchema = z.object({
-  // The stored path, which is also how the file is deleted later.
+  // How the file is deleted later: the path on local storage, ImageKit's own
+  // fileId on ImageKit. Opaque to us either way.
   file_id: z.string().trim().min(1).max(500),
+  /**
+   * Which storage the bytes went to. Recorded on the row so a later change of
+   * MEDIA_DRIVER never changes where this file is read from or deleted.
+   */
+  disk: z.enum(["local", "imagekit"]).optional(),
   file_path: z
     .string()
     .trim()
@@ -30,6 +36,7 @@ export const uploadedVideoSchema = z.object({
     .max(120)
     .regex(/^video\//, "Only video files can be used here")
     .optional(),
+  thumbnail_url: z.url().max(1000).optional(),
   width: z.coerce.number().int().min(0).max(20000).optional(),
   height: z.coerce.number().int().min(0).max(20000).optional(),
   duration: z.coerce.number().min(0).max(86400).optional(),

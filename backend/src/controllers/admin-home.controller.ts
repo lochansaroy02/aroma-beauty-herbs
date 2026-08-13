@@ -300,7 +300,7 @@ export async function createTile(req: Request, res: Response) {
     return res.status(201).json({ tile: { id: tile.id } });
   } catch (error) {
     // Nothing references the upload now, so don't leave it on disk.
-    if (input.image) await deleteMediaFiles([input.image.file_id]);
+    if (input.image) await deleteMediaFiles([input.image]);
     throw error;
   }
 }
@@ -338,7 +338,7 @@ export async function updateTile(req: Request, res: Response) {
             model_id: id,
             collection_name: { in: [MAIN_IMAGE_COLLECTION, GALLERY_COLLECTION] },
           },
-          select: { id: true, custom_properties: true },
+          select: { id: true, disk: true, custom_properties: true },
         });
 
         replaced = old;
@@ -353,7 +353,7 @@ export async function updateTile(req: Request, res: Response) {
       }
     });
   } catch (error) {
-    if (input.image) await deleteMediaFiles([input.image.file_id]);
+    if (input.image) await deleteMediaFiles([input.image]);
     throw error;
   }
 
@@ -372,7 +372,7 @@ export async function deleteTile(req: Request, res: Response) {
 
   const files = await prisma.media.findMany({
     where: { model_type: SMALL_BANNER_MODEL_TYPE, model_id: id },
-    select: { id: true, custom_properties: true },
+    select: { id: true, disk: true, custom_properties: true },
   });
 
   await prisma.$transaction(async (tx) => {

@@ -287,7 +287,7 @@ export async function updateProduct(req: Request, res: Response) {
 
   /** Anything uploaded for a save that never happened is an orphan. */
   async function discardInbound() {
-    if (inbound.length) await deleteMediaFiles(inbound.map((file) => file.file_id));
+    if (inbound.length) await deleteMediaFiles(inbound);
   }
 
 

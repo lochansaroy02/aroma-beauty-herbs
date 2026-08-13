@@ -292,6 +292,35 @@ export const SECTION_META: Record<
   tiles: { label: "Tile grid", hint: "The closing grid of links", layouts: TILE_LAYOUTS },
 };
 
+/* ── Media storage ────────────────────────────────────────────────────────
+   Which storage NEW uploads go to. Existing files keep the disk they were
+   written to, so switching never moves or breaks anything already uploaded. */
+
+export const MEDIA_DRIVERS = [
+  {
+    value: "local",
+    label: "Local disk",
+    hint: "Files live on the API server and are served from it. No third party, no limits, but they are yours to back up.",
+  },
+  {
+    value: "imagekit",
+    label: "ImageKit",
+    hint: "Files go to ImageKit's CDN. Takes image traffic off the server; needs the keys in backend/.env.",
+  },
+] as const;
+
+export type MediaDriver = (typeof MEDIA_DRIVERS)[number]["value"];
+
+export type MediaSettings = {
+  driver: MediaDriver;
+  /** "env" until an admin overrides it here, then "database". */
+  source: "env" | "database";
+  /** How many stored files sit on each disk. */
+  counts: Record<string, number>;
+  local: { root: string; base_url: string };
+  imagekit: { configured: boolean; endpoint: string | null };
+};
+
 /** The admin shapes — these carry drafts and inactive rows the storefront never sees. */
 export type AdminStrip = {
   id: number;

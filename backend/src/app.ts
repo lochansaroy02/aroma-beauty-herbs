@@ -1,8 +1,13 @@
 import cors from "cors";
 import express from "express";
 
-import { env } from "./lib/env";
-import { MEDIA_ROOT, MEDIA_URL_PREFIX } from "./lib/storage";
+import { env, isImageKitConfigured } from "./lib/env";
+import {
+  MEDIA_ROOT,
+  MEDIA_URL_PREFIX,
+  getActiveDisk,
+  isImageKitActive,
+} from "./lib/storage";
 import { errorHandler, notFound } from "./middleware/error-handler";
 import { adminRouter } from "./routes/admin.routes";
 import { authRouter } from "./routes/auth.routes";
@@ -30,8 +35,26 @@ export function createApp() {
 
   app.use(express.json());
 
+  /**
+   * Health, including which storage driver this process actually loaded.
+   *
+   * Reading MEDIA_DRIVER out of .env only tells you what is configured — env is
+   * read once at boot, so an edit without a restart leaves the file and the
+   * running process disagreeing. This answers for the process.
+   *
+   * Deliberately says whether ImageKit is configured, never what with: a public
+   * endpoint has no business confirming key material.
+   */
   app.get("/health", (_req, res) => {
-    res.json({ status: "ok" });
+    res.json({
+      status: "ok",
+      media: {
+        driver: getActiveDisk(),
+        ...(isImageKitActive()
+          ? { endpoint: env.IMAGEKIT_URL_ENDPOINT, ready: isImageKitConfigured }
+          : { root: MEDIA_ROOT, base_url: env.MEDIA_BASE_URL }),
+      },
+    });
   });
 
   /**

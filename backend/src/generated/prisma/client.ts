@@ -223,6 +223,17 @@ export type HomeSection = Prisma.HomeSectionModel
  */
 export type ContactMessage = Prisma.ContactMessageModel
 /**
+ * Model AppSetting
+ * *
+ *  * Runtime settings an admin can change without a redeploy.
+ *  *
+ *  * Deliberately tiny and key/value: these are switches, not configuration with
+ *  * structure. Anything that needs a shape of its own gets its own table.
+ *  * A key that is absent falls back to its .env default, so the database only
+ *  * ever holds a deliberate override.
+ */
+export type AppSetting = Prisma.AppSettingModel
+/**
  * Model PageVisit
  * 
  */

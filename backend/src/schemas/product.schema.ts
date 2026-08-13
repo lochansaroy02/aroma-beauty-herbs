@@ -48,8 +48,14 @@ export const MAX_GALLERY_IMAGES = 10;
  * reshape what lands in the database.
  */
 export const uploadedImageSchema = z.object({
-  // The stored path, which is also how the file is deleted later.
+  // How the file is deleted later: the path on local storage, ImageKit's own
+  // fileId on ImageKit. Opaque to us either way.
   file_id: z.string().trim().min(1).max(500),
+  /**
+   * Which storage the bytes went to. Recorded on the row so a later change of
+   * MEDIA_DRIVER never changes where this file is read from or deleted.
+   */
+  disk: z.enum(["local", "imagekit"]).optional(),
   file_path: z
     .string()
     .trim()
@@ -66,6 +72,7 @@ export const uploadedImageSchema = z.object({
     .max(120)
     .regex(/^image\//, "Only images can be attached to a product")
     .optional(),
+  thumbnail_url: z.url().max(1000).optional(),
   width: z.coerce.number().int().min(0).max(20000).optional(),
   height: z.coerce.number().int().min(0).max(20000).optional(),
   alt: z.string().trim().max(200).optional(),

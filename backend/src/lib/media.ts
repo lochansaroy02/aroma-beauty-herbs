@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import { Prisma } from "../generated/prisma/client";
-import { mediaUrl } from "./storage";
+import { getActiveDisk, mediaUrlFor } from "./storage";
+import type { FileRef, StoredFile } from "./storage-shared";
 
 /**
  * Matches how Laravel/Spatie writes the polymorphic key, so rows created here
@@ -17,8 +18,8 @@ export const GALLERY_COLLECTION = "gallery";
 /** The single video file attached to a video section. */
 export const VIDEO_COLLECTION = "video";
 
-/** `disk` records where the bytes actually live. */
-export const LOCAL_DISK = "local";
+/** `disk` records where the bytes actually live, per row. */
+export { IMAGEKIT_DISK, LOCAL_DISK } from "./storage-shared";
 
 /** Spatie requires these Json columns; empty objects are its own defaults. */
 export const EMPTY_MEDIA_JSON = {
@@ -36,6 +37,8 @@ export type MediaRow = {
   size: number;
   order_column: number | null;
   collection_name: string;
+  /** Which storage holds the bytes. Drives both the URL and the delete. */
+  disk: string;
   custom_properties: Prisma.JsonValue;
 };
 
@@ -50,6 +53,8 @@ export type UploadedFile = {
   file_path: string;
   name: string;
   size: number;
+  /** Set by the upload endpoint; absent means "whatever is active now". */
+  disk?: string | undefined;
   mime_type?: string | undefined;
   thumbnail_url?: string | undefined;
   width?: number | undefined;
@@ -89,7 +94,8 @@ export function toMediaPayload(media: MediaRow) {
 
   return {
     id: media.id,
-    url: mediaUrl(media.file_name),
+    // Resolved against this row's disk, not the active driver.
+    url: mediaUrlFor(media.disk, media.file_name),
     path: media.file_name,
     file_id: str(properties.file_id),
     thumbnail_url: str(properties.thumbnail_url),
@@ -124,6 +130,7 @@ export const mediaSelect = {
   size: true,
   order_column: true,
   collection_name: true,
+  disk: true,
   custom_properties: true,
 } satisfies Prisma.MediaSelect;
 
@@ -159,7 +166,9 @@ export async function createMediaRows(
         // Path only — the URL is rebuilt from MEDIA_BASE_URL on read.
         file_name: file.file_path,
         mime_type: file.mime_type ?? null,
-        disk: LOCAL_DISK,
+        // The disk this file was actually written to, so a later driver
+        // switch never changes where this row is read from.
+        disk: file.disk ?? getActiveDisk(),
         size: file.size,
         order_column: startAt + index + 1,
         created_at: now,
@@ -176,9 +185,20 @@ export async function createMediaRows(
   return rows;
 }
 
-/** Pulls the stored paths out of media rows, for cleanup after a delete. */
-export function fileIdsOf(rows: Pick<MediaRow, "custom_properties">[]): string[] {
+/**
+ * Delete references for media rows.
+ *
+ * Returns the disk alongside the id: a library that has been through a driver
+ * switch holds rows on both, and deleting an ImageKit file by unlinking a local
+ * path (or the reverse) silently does nothing.
+ */
+export function fileIdsOf(
+  rows: Pick<MediaRow, "custom_properties" | "disk">[]
+): FileRef[] {
   return rows
-    .map((row) => str(((row.custom_properties ?? {}) as CustomProperties).file_id))
-    .filter((id): id is string => id !== null);
+    .map((row) => ({
+      disk: row.disk,
+      file_id: str(((row.custom_properties ?? {}) as CustomProperties).file_id),
+    }))
+    .filter((ref): ref is FileRef => ref.file_id !== null);
 }

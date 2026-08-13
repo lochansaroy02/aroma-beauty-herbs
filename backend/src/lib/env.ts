@@ -20,6 +20,10 @@ const smtpPassword = (process.env["SMTP_PASSWORD"] ?? "").replace(/\s+/g, "");
 export const env = {
   NODE_ENV: process.env["NODE_ENV"] ?? "development",
   DATABASE_URL: required("DATABASE_URL"),
+  // Postgres schema holding the tables. Set explicitly because some hosts
+  // (Neon's pooler among them) return an empty search_path, which leaves
+  // unqualified table names unresolvable.
+  DATABASE_SCHEMA: process.env["DATABASE_SCHEMA"] || "public",
   JWT_SECRET: required("JWT_SECRET"),
   JWT_EXPIRES_IN: process.env["JWT_EXPIRES_IN"] ?? "7d",
   PORT: Number(process.env["PORT"] ?? 4000),
@@ -43,6 +47,21 @@ export const env = {
   MEDIA_BASE_URL: (
     process.env["MEDIA_BASE_URL"] || `http://localhost:${process.env["PORT"] ?? 4000}`
   ).replace(/\/+$/, ""),
+
+  /**
+   * Which storage NEW uploads go to: "local" or "imagekit".
+   *
+   * Only new ones. Every media row records the disk it was written to, and URLs
+   * and deletes are resolved from that, so flipping this leaves everything
+   * already uploaded working exactly where it is.
+   */
+  MEDIA_DRIVER: (process.env["MEDIA_DRIVER"] || "local").trim().toLowerCase(),
+
+  // ImageKit, used when MEDIA_DRIVER=imagekit. Only the file path is stored, so
+  // moving to a custom domain is a change to the endpoint alone.
+  IMAGEKIT_PUBLIC_KEY: process.env["IMAGEKIT_PUBLIC_KEY"] ?? "",
+  IMAGEKIT_PRIVATE_KEY: process.env["IMAGEKIT_PRIVATE_KEY"] ?? "",
+  IMAGEKIT_URL_ENDPOINT: (process.env["IMAGEKIT_URL_ENDPOINT"] ?? "").replace(/\/+$/, ""),
 
   // Razorpay. Live keys arrive once the business is verified on their dashboard;
   // until then these stay as placeholders and checkout runs in unpaid mode.
@@ -80,6 +99,11 @@ export const env = {
 } as const;
 
 export const isProduction = env.NODE_ENV === "production";
+
+/** All three are needed to upload; without them the ImageKit driver won't start. */
+export const isImageKitConfigured = Boolean(
+  env.IMAGEKIT_PUBLIC_KEY && env.IMAGEKIT_PRIVATE_KEY && env.IMAGEKIT_URL_ENDPOINT
+);
 
 
 /**

@@ -7,6 +7,7 @@ import {
   VIDEO_FOLDER,
   deleteMediaFiles,
   isAllowedMime,
+  requireStorage,
   saveUpload,
 } from "../lib/storage";
 
@@ -36,6 +37,10 @@ export async function uploadMedia(req: Request, res: Response) {
     throw new HttpError(422, "Validation failed", z.flattenError(parsed.error).fieldErrors);
   }
 
+  // Fails with a clear 503 when the active driver isn't configured, rather
+  // than accepting the bytes and losing them.
+  requireStorage();
+
   const kind: Kind = parsed.data.kind;
   const file = req.file;
 
@@ -64,11 +69,17 @@ export async function uploadMedia(req: Request, res: Response) {
   });
 
   return res.status(201).json({
-    file_id: stored.file_path,
+    file_id: stored.file_id,
     file_path: stored.file_path,
     name: stored.name,
     size: stored.size,
     mime_type: stored.mime_type,
+    // Echoed back so the row records the disk these bytes actually went to,
+    // even if MEDIA_DRIVER changes between this upload and the form's save.
+    disk: stored.disk,
+    ...(stored.width ? { width: stored.width } : {}),
+    ...(stored.height ? { height: stored.height } : {}),
+    ...(stored.thumbnail_url ? { thumbnail_url: stored.thumbnail_url } : {}),
   });
 }
 

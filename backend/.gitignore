@@ -5,3 +5,4 @@ dist/
 # Uploaded media — user data, not source. There is no second copy now that
 # ImageKit is gone, so back this directory up separately rather than commit it.
 media/
+prisma.txt

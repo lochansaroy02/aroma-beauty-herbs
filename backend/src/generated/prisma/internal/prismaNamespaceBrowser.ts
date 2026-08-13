@@ -85,6 +85,7 @@ export const ModelName = {
   HomeStrip: 'HomeStrip',
   HomeSection: 'HomeSection',
   ContactMessage: 'ContactMessage',
+  AppSetting: 'AppSetting',
   PageVisit: 'PageVisit',
   Media: 'Media'
 } as const
@@ -703,6 +704,16 @@ export const ContactMessageScalarFieldEnum = {
 } as const
 
 export type ContactMessageScalarFieldEnum = (typeof ContactMessageScalarFieldEnum)[keyof typeof ContactMessageScalarFieldEnum]
+
+
+export const AppSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updated_by: 'updated_by',
+  updated_at: 'updated_at'
+} as const
+
+export type AppSettingScalarFieldEnum = (typeof AppSettingScalarFieldEnum)[keyof typeof AppSettingScalarFieldEnum]
 
 
 export const PageVisitScalarFieldEnum = {

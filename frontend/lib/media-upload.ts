@@ -38,7 +38,13 @@ export type UploadedImage = {
   name: string;
   size: number;
   mime_type?: string;
-  /** Kept optional so existing rows that carry them still typecheck. */
+  /**
+   * Which storage the API wrote it to ("local" | "imagekit"). Passed straight
+   * back on save so the row records the disk these bytes actually went to, even
+   * if MEDIA_DRIVER changes in between.
+   */
+  disk?: string;
+  /** ImageKit reports these; the local driver doesn't. */
   thumbnail_url?: string;
   width?: number;
   height?: number;
@@ -84,6 +90,10 @@ type UploadResponse = {
   name?: string;
   size?: number;
   mime_type?: string;
+  disk?: string;
+  thumbnail_url?: string;
+  width?: number;
+  height?: number;
   error?: string;
 };
 
@@ -124,5 +134,9 @@ export async function uploadMedia(
     name: payload.name ?? file.name,
     size: payload.size ?? file.size,
     mime_type: payload.mime_type ?? file.type,
+    ...(payload.disk ? { disk: payload.disk } : {}),
+    ...(payload.thumbnail_url ? { thumbnail_url: payload.thumbnail_url } : {}),
+    ...(payload.width ? { width: payload.width } : {}),
+    ...(payload.height ? { height: payload.height } : {}),
   };
 }

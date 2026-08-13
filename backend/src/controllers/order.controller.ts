@@ -92,6 +92,8 @@ async function imagesFor(orders: OrderWithRelations[]) {
       size: true,
       order_column: true,
       collection_name: true,
+      // Needed to build the URL: a row's disk decides which endpoint serves it.
+      disk: true,
       custom_properties: true,
     },
     orderBy: [{ order_column: "asc" }, { id: "asc" }],

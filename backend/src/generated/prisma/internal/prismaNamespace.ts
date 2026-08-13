@@ -431,6 +431,7 @@ export const ModelName = {
   HomeStrip: 'HomeStrip',
   HomeSection: 'HomeSection',
   ContactMessage: 'ContactMessage',
+  AppSetting: 'AppSetting',
   PageVisit: 'PageVisit',
   Media: 'Media'
 } as const
@@ -448,7 +449,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userAddress" | "category" | "brand" | "attribute" | "attributeValue" | "taxRate" | "product" | "productVariant" | "productVariantAttribute" | "productPrice" | "productInventory" | "stockTransaction" | "cartItem" | "wishlist" | "order" | "orderItem" | "orderStatusHistory" | "coupon" | "productReview" | "blog" | "blogCategory" | "policy" | "contactForm" | "subscriber" | "banner" | "smallBanner" | "topBarText" | "homeCustomerReview" | "homeProductSection" | "homeVideoSection" | "homeStrip" | "homeSection" | "contactMessage" | "pageVisit" | "media"
+    modelProps: "user" | "userAddress" | "category" | "brand" | "attribute" | "attributeValue" | "taxRate" | "product" | "productVariant" | "productVariantAttribute" | "productPrice" | "productInventory" | "stockTransaction" | "cartItem" | "wishlist" | "order" | "orderItem" | "orderStatusHistory" | "coupon" | "productReview" | "blog" | "blogCategory" | "policy" | "contactForm" | "subscriber" | "banner" | "smallBanner" | "topBarText" | "homeCustomerReview" | "homeProductSection" | "homeVideoSection" | "homeStrip" | "homeSection" | "contactMessage" | "appSetting" | "pageVisit" | "media"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2968,6 +2969,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AppSetting: {
+      payload: Prisma.$AppSettingPayload<ExtArgs>
+      fields: Prisma.AppSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.AppSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>
+        }
+        findMany: {
+          args: Prisma.AppSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>[]
+        }
+        create: {
+          args: Prisma.AppSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>
+        }
+        createMany: {
+          args: Prisma.AppSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.AppSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>
+        }
+        update: {
+          args: Prisma.AppSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.AppSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.AppSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.AppSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppSetting>
+        }
+        groupBy: {
+          args: Prisma.AppSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppSettingCountAggregateOutputType> | number
+        }
+      }
+    }
     PageVisit: {
       payload: Prisma.$PageVisitPayload<ExtArgs>
       fields: Prisma.PageVisitFieldRefs
@@ -3755,6 +3830,16 @@ export const ContactMessageScalarFieldEnum = {
 export type ContactMessageScalarFieldEnum = (typeof ContactMessageScalarFieldEnum)[keyof typeof ContactMessageScalarFieldEnum]
 
 
+export const AppSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updated_by: 'updated_by',
+  updated_at: 'updated_at'
+} as const
+
+export type AppSettingScalarFieldEnum = (typeof AppSettingScalarFieldEnum)[keyof typeof AppSettingScalarFieldEnum]
+
+
 export const PageVisitScalarFieldEnum = {
   id: 'id',
   visitor_id: 'visitor_id',
@@ -4193,6 +4278,7 @@ export type GlobalOmitConfig = {
   homeStrip?: Prisma.HomeStripOmit
   homeSection?: Prisma.HomeSectionOmit
   contactMessage?: Prisma.ContactMessageOmit
+  appSetting?: Prisma.AppSettingOmit
   pageVisit?: Prisma.PageVisitOmit
   media?: Prisma.MediaOmit
 }
