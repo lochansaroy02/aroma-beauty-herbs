@@ -19,6 +19,7 @@ import {
 } from "./routes/checkout.routes";
 import { contactRouter } from "./routes/contact.routes";
 import { homeRouter } from "./routes/home.routes";
+import { internalRouter } from "./routes/internal.routes";
 import { mediaRouter } from "./routes/media.routes";
 import { productRouter } from "./routes/product.routes";
 import { brandRouter, categoryRouter } from "./routes/taxonomy.routes";
@@ -93,6 +94,7 @@ export function createApp() {
   app.use("/orders", orderRouter);
   app.use("/videos", videoRouter);
   app.use("/admin", adminRouter);
+  app.use("/internal", internalRouter);
 
   app.use(notFound);
   app.use(errorHandler);

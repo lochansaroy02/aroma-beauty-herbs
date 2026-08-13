@@ -77,6 +77,11 @@ export const env = {
     Number(process.env["ORDER_RESERVATION_MINUTES"] ?? 30) || 30
   ),
 
+  // Shared secret the scheduler presents to /internal/sweep. Only needed where
+  // the schedule lives outside the process (Vercel Cron); the VPS entry point
+  // runs the sweep on its own timer and never calls that route.
+  CRON_SECRET: process.env["CRON_SECRET"] ?? "",
+
   // SMTP is optional: with no SMTP_HOST the mailer logs to the console instead,
   // so signup can be exercised locally without credentials.
   SMTP_HOST: process.env["SMTP_HOST"] ?? "",
@@ -99,6 +104,16 @@ export const env = {
 } as const;
 
 export const isProduction = env.NODE_ENV === "production";
+
+/**
+ * Running on Vercel, where the filesystem is read-only apart from a /tmp that
+ * is discarded with the instance. Set by the platform, so it is true on the
+ * deployment and false everywhere else without any configuration.
+ *
+ * The consequence that matters: the local media driver cannot store anything
+ * there, so a switch to it has to be refused rather than silently lose files.
+ */
+export const isServerless = Boolean(process.env["VERCEL"]);
 
 /** All three are needed to upload; without them the ImageKit driver won't start. */
 export const isImageKitConfigured = Boolean(

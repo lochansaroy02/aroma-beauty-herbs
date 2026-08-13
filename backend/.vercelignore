@@ -1,0 +1,13 @@
+# Uploaded media is user data on the VPS deployment. It has no meaning on
+# Vercel — the filesystem is read-only there — and uploading it would only make
+# every deploy slower.
+media/
+
+# Built by Vercel, never shipped to it.
+dist/
+node_modules/
+
+# Secrets belong in the project's environment variables, never in the bundle.
+.env
+.env.*
+!.env.example

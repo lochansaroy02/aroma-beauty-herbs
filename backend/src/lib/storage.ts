@@ -1,4 +1,4 @@
-import { env, isImageKitConfigured } from "./env";
+import { env, isImageKitConfigured, isServerless } from "./env";
 import { HttpError } from "./http-error";
 import { prisma } from "./prisma";
 import {
@@ -126,6 +126,18 @@ export async function setActiveDisk(
       422,
       "ImageKit isn't configured. Set IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY " +
         "and IMAGEKIT_URL_ENDPOINT in backend/.env, then restart the API."
+    );
+  }
+
+  // Local storage is a real production option on a VPS, where the disk persists.
+  // On Vercel it is not one: the filesystem is read-only, so every upload after
+  // the switch would fail, and the setting would look applied the whole time.
+  if (disk === LOCAL_DISK && isServerless) {
+    throw new HttpError(
+      422,
+      "This deployment has no writable disk, so local storage can't be used here. " +
+        "Uploads must go to ImageKit. Local storage is available when the API runs " +
+        "on a server of its own."
     );
   }
 

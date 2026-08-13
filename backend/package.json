@@ -26,7 +26,7 @@
 
     "build": "prisma generate && tsc",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && tsc"
+    "vercel-build": "prisma generate && tsc -p tsconfig.vercel.json"
   },
   "keywords": [],
   "author": "",
