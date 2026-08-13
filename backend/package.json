@@ -25,8 +25,7 @@
     "media:migrate": "tsc && node dist/migrate-media-local.js",
 
     "build": "prisma generate && tsc",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && tsc -p tsconfig.vercel.json"
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
