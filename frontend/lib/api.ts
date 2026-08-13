@@ -1,6 +1,20 @@
 import "server-only";
 
-export const API_URL = process.env.API_URL ?? "http://localhost:4000";
+/**
+ * Origin of the Express API, with any trailing slash removed.
+ *
+ * Every caller builds a URL as `${API_URL}${path}` where `path` already starts
+ * with a slash, so an origin ending in one produces `https://host//products`.
+ * That is not the same path: Express doesn't route it, and a proxy in front of
+ * the API may reject it before Express is even reached. Pasting a URL with the
+ * slash on the end is the normal thing to do — copying it out of a browser
+ * gives you one — so the value is normalised here rather than left as a rule
+ * everyone has to remember.
+ */
+export const API_URL = (process.env.API_URL ?? "http://localhost:4000").replace(
+  /\/+$/,
+  ""
+);
 
 /** Field-level messages keyed by input name, as returned by the API on 422. */
 export type FieldErrors = Record<string, string[]>;
