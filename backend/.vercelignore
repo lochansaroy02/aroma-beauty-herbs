@@ -1,13 +1,21 @@
+# Patterns here are gitignore-style and are matched against the whole cloned
+# repository, not just this directory — an unanchored `media/` also matches
+# frontend/app/api/media/, which it must not. Both spellings are listed because
+# the base the patterns resolve against differs with the project's Root
+# Directory setting; each is exact, so a stray match isn't possible either way.
+
 # Uploaded media is user data on the VPS deployment. It has no meaning on
 # Vercel — the filesystem is read-only there — and uploading it would only make
 # every deploy slower.
-media/
+/media/
+backend/media/
 
 # Built by Vercel, never shipped to it.
-dist/
-node_modules/
+/dist/
+backend/dist/
 
 # Secrets belong in the project's environment variables, never in the bundle.
+# Left unanchored on purpose: an .env at any depth should stay out.
 .env
 .env.*
 !.env.example

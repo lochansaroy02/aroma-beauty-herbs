@@ -127,3 +127,15 @@ path becomes a backstop. Both are compare-and-set and safe to overlap.
 
 **Cold starts.** Each new instance runs one extra query to read the media driver
 before serving its first request. Neon's pooled endpoint keeps that cheap.
+
+**`public/` exists to satisfy the build, not to serve a site.** Defining a build
+command makes Vercel insist on static output afterwards, and an API has none —
+the first deploy failed with *No Output Directory named "public" found*. The
+directory holds one placeholder page. Vercel checks the filesystem before
+applying `rewrites`, so that page answers `/` and every other path still reaches
+the function.
+
+**`.vercelignore` patterns are matched against the whole repository**, not just
+this directory, and they are gitignore-style — so an unanchored `media/` also
+matched `frontend/app/api/media/`, which the first deploy duly deleted from the
+build. The patterns are anchored now. Worth remembering before adding another.
