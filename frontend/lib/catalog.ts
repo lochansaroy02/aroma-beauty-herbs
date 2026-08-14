@@ -703,3 +703,235 @@ const rupees = new Intl.NumberFormat("en-IN", {
 export function formatPrice(value: number | null): string {
   return value === null ? "—" : rupees.format(value);
 }
+
+/* ── The customer's own account ─────────────────────────────────────────── */
+
+/**
+ * A saved delivery address. Mirrors the API's user_addresses row, minus the
+ * owner's id — every endpoint is already scoped to the signed-in customer.
+ */
+export type Address = {
+  id: number;
+  address_title: string | null;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  address_line_1: string;
+  address_line_2: string | null;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  is_default: boolean;
+};
+
+/** Order counts for the dashboard. `pending` is everything still in flight. */
+export type AccountStats = {
+  total: number;
+  successful: number;
+  pending: number;
+  cancelled: number;
+};
+
+export type AccountProfile = {
+  id: number;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  /** An address awaiting its code. Null once verified or abandoned. */
+  pending_email: string | null;
+  role_as: string | null;
+  email_verified_at: string | null;
+  created_at: string | null;
+};
+
+/** The account area's sidebar, in display order. */
+export const ACCOUNT_NAV = [
+  { href: "/account", label: "Dashboard", icon: "dashboard" },
+  { href: "/account/orders", label: "My Orders", icon: "orders" },
+  { href: "/account/addresses", label: "My address", icon: "address" },
+  { href: "/account/settings", label: "Setting", icon: "settings" },
+] as const;
+
+export type AccountNavItem = (typeof ACCOUNT_NAV)[number];
+
+/** Blank address, so the form has a single shape for "new" and "edit". */
+export const EMPTY_ADDRESS: Omit<Address, "id"> = {
+  address_title: "",
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  address_line_1: "",
+  address_line_2: "",
+  city: "",
+  state: "",
+  zip_code: "",
+  country: "India",
+  is_default: false,
+};
+
+/* ── Contact enquiries (admin) ──────────────────────────────────────────── */
+
+export type ContactStatus = "pending" | "working" | "completed";
+
+/** Ordered as the work actually flows, which is how the dropdown reads. */
+export const CONTACT_STATUSES: readonly {
+  value: ContactStatus;
+  label: string;
+}[] = [
+  { value: "pending", label: "Pending" },
+  { value: "working", label: "Working" },
+  { value: "completed", label: "Completed" },
+];
+
+export type ContactMessage = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  subject: string | null;
+  message: string;
+  status: ContactStatus;
+  /** Whether the notification email to staff actually went out. */
+  notified: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type ContactMessageList = {
+  messages: ContactMessage[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+    has_more: boolean;
+  };
+  counts: { pending: number; working: number; completed: number; all: number };
+  applied: {
+    search: string | null;
+    status: ContactStatus | null;
+    sort: string;
+    limit: number;
+  };
+};
+
+/** "Show entries" options, matching the other admin lists. */
+export const CONTACT_PAGE_SIZES = [25, 50, 100] as const;
+
+export const CONTACT_SORTS: readonly { value: string; label: string }[] = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+];
+
+/* ── Coupons ────────────────────────────────────────────────────────────── */
+
+export type CouponType = "fixed" | "percent";
+
+export const COUPON_TYPES: readonly { value: CouponType; label: string }[] = [
+  { value: "fixed", label: "Fixed Amount (₹)" },
+  { value: "percent", label: "Percentage (%)" },
+];
+
+export type Coupon = {
+  id: number;
+  name: string | null;
+  code: string | null;
+  type: CouponType;
+  value: number;
+  min_spend: number | null;
+  max_spend: number | null;
+  usage_limit_per_coupon: number | null;
+  usage_limit_per_user: number | null;
+  usage_count: number;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+  is_active: boolean;
+  created_at: string | null;
+};
+
+export type CouponList = {
+  coupons: Coupon[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+    has_more: boolean;
+  };
+  summary: { active: number; inactive: number; total: number };
+  applied: { search: string | null; status: string | null; limit: number };
+};
+
+/** What the Add/Edit form holds. Everything is a string — it's form state. */
+export type CouponDraft = {
+  name: string;
+  code: string;
+  type: CouponType;
+  value: string;
+  min_spend: string;
+  max_spend: string;
+  usage_limit_per_coupon: string;
+  usage_limit_per_user: string;
+  start_date: string;
+  end_date: string;
+  description: string;
+  is_active: boolean;
+};
+
+export const EMPTY_COUPON: CouponDraft = {
+  name: "",
+  code: "",
+  type: "fixed",
+  value: "",
+  min_spend: "",
+  max_spend: "",
+  usage_limit_per_coupon: "",
+  usage_limit_per_user: "",
+  start_date: "",
+  end_date: "",
+  description: "",
+  is_active: true,
+};
+
+/** `2026-06-22T15:00` — what <input type="datetime-local"> expects. */
+export function toDateTimeLocal(value: string | null): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+}
+
+export function couponToDraft(coupon: Coupon): CouponDraft {
+  const text = (value: number | null) => (value === null ? "" : String(value));
+
+  return {
+    name: coupon.name ?? "",
+    code: coupon.code ?? "",
+    type: coupon.type,
+    value: String(coupon.value),
+    min_spend: text(coupon.min_spend),
+    max_spend: text(coupon.max_spend),
+    usage_limit_per_coupon: text(coupon.usage_limit_per_coupon),
+    usage_limit_per_user: text(coupon.usage_limit_per_user),
+    start_date: toDateTimeLocal(coupon.start_date),
+    end_date: toDateTimeLocal(coupon.end_date),
+    description: coupon.description ?? "",
+    is_active: coupon.is_active,
+  };
+}
+
+/** "10.00%" or "₹50" — how the discount reads in the list. */
+export function formatCouponDiscount(coupon: Coupon): string {
+  return coupon.type === "percent"
+    ? `${coupon.value.toFixed(2)}%`
+    : formatPrice(coupon.value);
+}

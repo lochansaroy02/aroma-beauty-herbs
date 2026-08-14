@@ -19,6 +19,7 @@ import {
   type CheckoutFields,
 } from "@/lib/checkout-actions";
 import { openRazorpayCheckout } from "@/lib/razorpay-client";
+import { useCoupon } from "./coupon-box";
 
 type Props = {
   defaults: { name: string | null; email: string; phone: string | null };
@@ -42,6 +43,7 @@ function splitName(full: string | null): { first: string; last: string } {
 export function CheckoutForm({ defaults }: Props) {
   const router = useRouter();
   const initial = splitName(defaults.name);
+  const { applied, setApplied } = useCoupon();
 
   const [stage, setStage] = useState<Stage>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +69,9 @@ export function CheckoutForm({ defaults }: Props) {
       country: text("country") || "India",
       notes: text("notes"),
       save_address: saveAddress,
+      // Only the code travels. The API recomputes the discount from it, so a
+      // tampered amount in this payload changes nothing.
+      ...(applied ? { coupon_code: applied.code } : {}),
     };
   }
 
@@ -83,6 +88,11 @@ export function CheckoutForm({ defaults }: Props) {
       setError(placed.error);
       setFieldErrors(placed.fieldErrors);
       setStage("idle");
+
+      // The API re-checks the coupon at order time. If that is what it
+      // rejected, drop it — leaving it applied would keep showing a discount
+      // the order can't have, and every retry would fail the same way.
+      if (applied && placed.fieldErrors?.["coupon_code"]) setApplied(null);
       return;
     }
 

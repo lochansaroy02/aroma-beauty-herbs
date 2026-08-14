@@ -53,6 +53,13 @@ enum CouponType {
   percent
 }
 
+/** How far along a contact-form enquiry is. */
+enum ContactStatus {
+  pending
+  working
+  completed
+}
+
 enum StockTxnType {
   IN
   OUT
@@ -67,6 +74,10 @@ model User {
   email             String    @unique
   phone             String?
   email_verified_at DateTime?
+  // An email change the user has asked for but not yet proved they own. The
+  // live `email` is left alone until a code sent to this address comes back,
+  // so a typo can't lock anyone out of their own account.
+  pending_email     String?
   password          String
   show_password     String?
   role_as           String?   // "Admin" | "Customer"
@@ -752,13 +763,20 @@ model ContactMessage {
   subject    String?
   message    String    @db.Text
   /** Whether the notification email actually went out. */
-  notified   Boolean   @default(false)
-  is_handled Boolean   @default(false)
-  ip_hash    String?   @db.VarChar(64)
-  created_at DateTime? @default(now())
-  updated_at DateTime? @updatedAt
+  notified   Boolean       @default(false)
+  /**
+   * Where staff have got to with this enquiry. Superseded `is_handled`, which
+   * only had two states and was never written by anything — it is kept so the
+   * column doesn't have to be dropped, but nothing reads it.
+   */
+  status     ContactStatus @default(pending)
+  is_handled Boolean       @default(false)
+  ip_hash    String?       @db.VarChar(64)
+  created_at DateTime?     @default(now())
+  updated_at DateTime?     @updatedAt
 
   @@index([created_at])
+  @@index([status])
   @@map("contact_messages")
 }
 

@@ -3236,6 +3236,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   phone: 'phone',
   email_verified_at: 'email_verified_at',
+  pending_email: 'pending_email',
   password: 'password',
   show_password: 'show_password',
   role_as: 'role_as',
@@ -3821,6 +3822,7 @@ export const ContactMessageScalarFieldEnum = {
   subject: 'subject',
   message: 'message',
   notified: 'notified',
+  status: 'status',
   is_handled: 'is_handled',
   ip_hash: 'ip_hash',
   created_at: 'created_at',
@@ -4077,6 +4079,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'ContactStatus'
+ */
+export type EnumContactStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContactStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ContactStatus[]'
+ */
+export type ListEnumContactStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContactStatus[]'>
     
 
 

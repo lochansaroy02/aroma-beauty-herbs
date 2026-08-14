@@ -1,6 +1,18 @@
 import { Router } from "express";
 
 import {
+  deleteContactMessage,
+  listContactMessages,
+  updateContactStatus,
+} from "../controllers/admin-contact.controller";
+import {
+  createCoupon,
+  deleteCoupon,
+  listCoupons,
+  toggleCouponStatus,
+  updateCoupon,
+} from "../controllers/admin-coupon.controller";
+import {
   getAdminOrder,
   listAdminOrders,
   updateOrderStatus,
@@ -73,6 +85,18 @@ adminRouter.post("/home/tiles", createTile);
 adminRouter.post("/home/tiles/reorder", reorderTiles);
 adminRouter.patch("/home/tiles/:id", updateTile);
 adminRouter.delete("/home/tiles/:id", deleteTile);
+
+// Contact-form enquiries: the storefront writes them, staff triage them here.
+adminRouter.get("/contact", listContactMessages);
+adminRouter.patch("/contact/:id/status", updateContactStatus);
+adminRouter.delete("/contact/:id", deleteContactMessage);
+
+// Discount codes. `/:id/status` is the list's toggle; `/:id` is the full edit.
+adminRouter.get("/coupons", listCoupons);
+adminRouter.post("/coupons", createCoupon);
+adminRouter.patch("/coupons/:id", updateCoupon);
+adminRouter.patch("/coupons/:id/status", toggleCouponStatus);
+adminRouter.delete("/coupons/:id", deleteCoupon);
 
 adminRouter.get("/orders", listAdminOrders);
 adminRouter.get("/orders/:orderNumber", getAdminOrder);

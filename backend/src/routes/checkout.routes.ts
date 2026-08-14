@@ -4,6 +4,7 @@ import {
   cancelCheckout,
   createCheckout,
   getCheckoutConfig,
+  previewCoupon,
   razorpayWebhook,
   retryCheckoutPayment,
   simulatePayment,
@@ -29,6 +30,8 @@ export const checkoutRouter = Router();
 
 checkoutRouter.get("/config", requireAuth, getCheckoutConfig);
 checkoutRouter.post("/", requireAuth, createCheckout);
+// Preview only — spends nothing, so it sits alongside the order route.
+checkoutRouter.post("/coupon", requireAuth, previewCoupon);
 checkoutRouter.post("/:orderNumber/verify", requireAuth, verifyCheckoutPayment);
 // Refuses itself once Razorpay is configured — see the controller.
 checkoutRouter.post("/:orderNumber/simulate", requireAuth, simulatePayment);

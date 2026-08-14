@@ -17,7 +17,24 @@ const adapter = new PrismaPg(
   { schema: env.DATABASE_SCHEMA }
 );
 
-export const prisma = new PrismaClient({ adapter });
+/**
+ * Transaction timeouts, raised well above Prisma's defaults.
+ *
+ * `maxWait` is how long `$transaction` will wait to *start*, and it defaults to
+ * 2 seconds. Opening a fresh connection to Neon costs a TLS handshake, and on a
+ * plan that auto-suspends when idle it also costs waking the compute — both
+ * comfortably past 2s. The result was P2028 "Unable to start a transaction in
+ * the given time" on the first few writes after any quiet period, then success
+ * once the pool was warm. Every write path in this app runs in a transaction,
+ * so that surfaced as a 500 on placing an order, saving an address, uploading a
+ * video — anything, but only sometimes, which is the worst way to find a bug.
+ *
+ * `timeout` is the separate budget for the work inside the callback.
+ */
+export const prisma = new PrismaClient({
+  adapter,
+  transactionOptions: { maxWait: 15_000, timeout: 20_000 },
+});
 
 /** Host and database from the URL, with credentials left out of logs. */
 function describeTarget(): string {

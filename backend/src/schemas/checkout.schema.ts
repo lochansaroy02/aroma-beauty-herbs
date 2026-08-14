@@ -23,10 +23,25 @@ export const billingSchema = z.object({
   country: z.string().trim().max(90).optional().default("India"),
 });
 
+/** Blank means "no coupon" rather than an empty code to look up. */
+export const couponCodeSchema = z.object({
+  code: z.string().trim().min(1, "Enter a coupon code").max(50),
+});
+
 export const checkoutSchema = billingSchema.extend({
   notes: z.string().trim().max(500).optional(),
   /** Keeps the address on the account for next time. */
   save_address: z.coerce.boolean().optional().default(false),
+  /**
+   * Re-validated server-side at order time, never trusted from the preview:
+   * a coupon can expire or run out between applying it and paying.
+   */
+  coupon_code: z
+    .string()
+    .trim()
+    .max(50)
+    .optional()
+    .transform((value) => value || undefined),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

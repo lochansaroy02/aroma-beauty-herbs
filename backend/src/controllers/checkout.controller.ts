@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { Prisma } from "../generated/prisma/client";
 import { availableQty, productInclude } from "../lib/catalog";
+import { resolveCoupon } from "../lib/coupons";
 import { env, isRazorpayConfigured } from "../lib/env";
 import { HttpError } from "../lib/http-error";
 import {
@@ -22,6 +23,7 @@ import {
 import {
   cancelPaymentSchema,
   checkoutSchema,
+  couponCodeSchema,
   verifyPaymentSchema,
   type CheckoutInput,
 } from "../schemas/checkout.schema";
@@ -146,6 +148,46 @@ export async function getCheckoutConfig(_req: Request, res: Response) {
 }
 
 /**
+ * POST /checkout/coupon — what a code is worth against the cart as it stands.
+ *
+ * A preview only: nothing is stored and no use is spent. The order endpoint
+ * resolves the code again from scratch, so a coupon that lapses between the two
+ * is caught rather than honoured.
+ */
+export async function previewCoupon(req: Request, res: Response) {
+  const user = userId(req);
+  const parsed = couponCodeSchema.safeParse(req.body ?? {});
+
+  if (!parsed.success) {
+    throw new HttpError(422, "Validation failed", z.flattenError(parsed.error).fieldErrors);
+  }
+
+  const rows = await prisma.cartItem.findMany({
+    where: { user_id: user },
+    include: cartInclude,
+    orderBy: { id: "asc" },
+  });
+
+  const lines = priceCart(rows);
+  const bare = orderTotals(lines.map((line) => line.totals));
+  const applied = await resolveCoupon(parsed.data.code, user, bare.subtotal);
+  const totals = orderTotals(lines.map((line) => line.totals), applied.discount);
+
+  return res.status(200).json({
+    coupon: applied.coupon,
+    discount: applied.discount,
+    totals: {
+      subtotal: totals.subtotal,
+      discount: totals.discount,
+      shipping: totals.shipping,
+      tax_total: totals.taxTotal,
+      total: totals.total,
+      currency: "INR",
+    },
+  });
+}
+
+/**
  * POST /checkout — turns the cart into an order.
  *
  * Stock is *reserved* here, not deducted: the sale isn't real until the payment
@@ -170,7 +212,32 @@ export async function createCheckout(req: Request, res: Response) {
   });
 
   const lines = priceCart(rows);
-  const totals = orderTotals(lines.map((line) => line.totals));
+  const bare = orderTotals(lines.map((line) => line.totals));
+
+  /**
+   * Re-checked here rather than trusted from the preview. Between applying a
+   * code and paying, it can expire, hit its limit, or stop matching a basket
+   * the shopper edited in another tab — and this is the number that gets
+   * charged.
+   */
+  const applied = input.coupon_code
+    ? await resolveCoupon(input.coupon_code, user, bare.subtotal).catch(
+        (error: unknown) => {
+          // Re-thrown against the field, so the checkout page can tell "your
+          // coupon lapsed" apart from "your address is wrong" and drop the
+          // stale discount instead of retrying with it forever.
+          if (error instanceof HttpError && error.status === 422) {
+            throw new HttpError(422, error.message, { coupon_code: [error.message] });
+          }
+          throw error;
+        }
+      )
+    : null;
+
+  const totals = orderTotals(
+    lines.map((line) => line.totals),
+    applied?.discount ?? 0
+  );
 
   const order = await prisma.$transaction(async (tx) => {
     const created = await tx.order.create({
@@ -196,6 +263,9 @@ export async function createCheckout(req: Request, res: Response) {
         total: new Prisma.Decimal(totals.total),
         payment_method: "razorpay",
         payment_status: "pending",
+        ...(applied
+          ? { coupon_id: applied.coupon.id, coupon_code: applied.coupon.code }
+          : {}),
         ...(input.notes ? { notes: input.notes } : {}),
       },
     });
@@ -236,6 +306,22 @@ export async function createCheckout(req: Request, res: Response) {
         user_id: user,
       },
     });
+
+    if (applied) {
+      /**
+       * Counted at order time, not at payment.
+       *
+       * A reservation already holds the stock, and a coupon capped at 100 uses
+       * would otherwise let 500 people reach the payment page at once. An
+       * abandoned order therefore spends a use — the same trade the stock
+       * reservation makes, and the sweeper that releases stock is where a
+       * refund of the use would belong if that's ever wanted.
+       */
+      await tx.coupon.update({
+        where: { id: applied.coupon.id },
+        data: { usage_count: { increment: 1 } },
+      });
+    }
 
     if (input.save_address) {
       await tx.userAddress.create({

@@ -4,12 +4,14 @@ import {
   ArrowUpRightIcon,
   BoxesIcon,
   FilmIcon,
+  InboxIcon,
   LayoutTemplateIcon,
   LayoutDashboardIcon,
   LeafIcon,
   PackageIcon,
   ShoppingCartIcon,
   StoreIcon,
+  TicketPercentIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,6 +35,8 @@ const NAV = [
   { href: "/admin/products", label: "All products", icon: PackageIcon },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCartIcon },
   { href: "/admin/inventory", label: "Inventory management", icon: BoxesIcon },
+  { href: "/admin/coupons", label: "Coupons", icon: TicketPercentIcon },
+  { href: "/admin/queries", label: "Contact queries", icon: InboxIcon },
   { href: "/admin/videos", label: "Videos", icon: FilmIcon },
   { href: "/admin/customisation", label: "Customisation", icon: LayoutTemplateIcon },
 ] as const;

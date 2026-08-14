@@ -42,6 +42,7 @@ export type UserMinAggregateOutputType = {
   email: string | null
   phone: string | null
   email_verified_at: Date | null
+  pending_email: string | null
   password: string | null
   show_password: string | null
   role_as: string | null
@@ -62,6 +63,7 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   phone: string | null
   email_verified_at: Date | null
+  pending_email: string | null
   password: string | null
   show_password: string | null
   role_as: string | null
@@ -82,6 +84,7 @@ export type UserCountAggregateOutputType = {
   email: number
   phone: number
   email_verified_at: number
+  pending_email: number
   password: number
   show_password: number
   role_as: number
@@ -114,6 +117,7 @@ export type UserMinAggregateInputType = {
   email?: true
   phone?: true
   email_verified_at?: true
+  pending_email?: true
   password?: true
   show_password?: true
   role_as?: true
@@ -134,6 +138,7 @@ export type UserMaxAggregateInputType = {
   email?: true
   phone?: true
   email_verified_at?: true
+  pending_email?: true
   password?: true
   show_password?: true
   role_as?: true
@@ -154,6 +159,7 @@ export type UserCountAggregateInputType = {
   email?: true
   phone?: true
   email_verified_at?: true
+  pending_email?: true
   password?: true
   show_password?: true
   role_as?: true
@@ -261,6 +267,7 @@ export type UserGroupByOutputType = {
   email: string
   phone: string | null
   email_verified_at: Date | null
+  pending_email: string | null
   password: string
   show_password: string | null
   role_as: string | null
@@ -304,6 +311,7 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   email_verified_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  pending_email?: Prisma.StringNullableFilter<"User"> | string | null
   password?: Prisma.StringFilter<"User"> | string
   show_password?: Prisma.StringNullableFilter<"User"> | string | null
   role_as?: Prisma.StringNullableFilter<"User"> | string | null
@@ -330,6 +338,7 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email_verified_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  pending_email?: Prisma.SortOrderInput | Prisma.SortOrder
   password?: Prisma.SortOrder
   show_password?: Prisma.SortOrderInput | Prisma.SortOrder
   role_as?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -359,6 +368,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   email_verified_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  pending_email?: Prisma.StringNullableFilter<"User"> | string | null
   password?: Prisma.StringFilter<"User"> | string
   show_password?: Prisma.StringNullableFilter<"User"> | string | null
   role_as?: Prisma.StringNullableFilter<"User"> | string | null
@@ -385,6 +395,7 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email_verified_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  pending_email?: Prisma.SortOrderInput | Prisma.SortOrder
   password?: Prisma.SortOrder
   show_password?: Prisma.SortOrderInput | Prisma.SortOrder
   role_as?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -413,6 +424,7 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   email_verified_at?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  pending_email?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   show_password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role_as?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -432,6 +444,7 @@ export type UserCreateInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -458,6 +471,7 @@ export type UserUncheckedCreateInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -483,6 +497,7 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -509,6 +524,7 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -535,6 +551,7 @@ export type UserCreateManyInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -554,6 +571,7 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -574,6 +592,7 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -594,6 +613,7 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrder
+  pending_email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   show_password?: Prisma.SortOrder
   role_as?: Prisma.SortOrder
@@ -619,6 +639,7 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrder
+  pending_email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   show_password?: Prisma.SortOrder
   role_as?: Prisma.SortOrder
@@ -639,6 +660,7 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrder
+  pending_email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   show_password?: Prisma.SortOrder
   role_as?: Prisma.SortOrder
@@ -793,6 +815,7 @@ export type UserCreateWithoutAddressesInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -818,6 +841,7 @@ export type UserUncheckedCreateWithoutAddressesInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -858,6 +882,7 @@ export type UserUpdateWithoutAddressesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -883,6 +908,7 @@ export type UserUncheckedUpdateWithoutAddressesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -907,6 +933,7 @@ export type UserCreateWithoutCart_itemsInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -932,6 +959,7 @@ export type UserUncheckedCreateWithoutCart_itemsInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -972,6 +1000,7 @@ export type UserUpdateWithoutCart_itemsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -997,6 +1026,7 @@ export type UserUncheckedUpdateWithoutCart_itemsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1021,6 +1051,7 @@ export type UserCreateWithoutWishlistsInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1046,6 +1077,7 @@ export type UserUncheckedCreateWithoutWishlistsInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1086,6 +1118,7 @@ export type UserUpdateWithoutWishlistsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1111,6 +1144,7 @@ export type UserUncheckedUpdateWithoutWishlistsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1135,6 +1169,7 @@ export type UserCreateWithoutOrdersInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1160,6 +1195,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1200,6 +1236,7 @@ export type UserUpdateWithoutOrdersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1225,6 +1262,7 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1249,6 +1287,7 @@ export type UserCreateWithoutOrder_historiesInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1274,6 +1313,7 @@ export type UserUncheckedCreateWithoutOrder_historiesInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1314,6 +1354,7 @@ export type UserUpdateWithoutOrder_historiesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1339,6 +1380,7 @@ export type UserUncheckedUpdateWithoutOrder_historiesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1363,6 +1405,7 @@ export type UserCreateWithoutReviewsInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1388,6 +1431,7 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   email: string
   phone?: string | null
   email_verified_at?: Date | string | null
+  pending_email?: string | null
   password: string
   show_password?: string | null
   role_as?: string | null
@@ -1428,6 +1472,7 @@ export type UserUpdateWithoutReviewsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1453,6 +1498,7 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pending_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password?: Prisma.StringFieldUpdateOperationsInput | string
   show_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1554,6 +1600,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   phone?: boolean
   email_verified_at?: boolean
+  pending_email?: boolean
   password?: boolean
   show_password?: boolean
   role_as?: boolean
@@ -1581,6 +1628,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   phone?: boolean
   email_verified_at?: boolean
+  pending_email?: boolean
   password?: boolean
   show_password?: boolean
   role_as?: boolean
@@ -1601,6 +1649,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   phone?: boolean
   email_verified_at?: boolean
+  pending_email?: boolean
   password?: boolean
   show_password?: boolean
   role_as?: boolean
@@ -1621,6 +1670,7 @@ export type UserSelectScalar = {
   email?: boolean
   phone?: boolean
   email_verified_at?: boolean
+  pending_email?: boolean
   password?: boolean
   show_password?: boolean
   role_as?: boolean
@@ -1635,7 +1685,7 @@ export type UserSelectScalar = {
   deleted_at?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "email_verified_at" | "password" | "show_password" | "role_as" | "status" | "otp" | "otp_expires_at" | "otp_attempts" | "otp_last_sent_at" | "remember_token" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "email_verified_at" | "pending_email" | "password" | "show_password" | "role_as" | "status" | "otp" | "otp_expires_at" | "otp_attempts" | "otp_last_sent_at" | "remember_token" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   addresses?: boolean | Prisma.User$addressesArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
@@ -1664,6 +1714,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     phone: string | null
     email_verified_at: Date | null
+    pending_email: string | null
     password: string
     show_password: string | null
     role_as: string | null
@@ -2110,6 +2161,7 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly email_verified_at: Prisma.FieldRef<"User", 'DateTime'>
+  readonly pending_email: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly show_password: Prisma.FieldRef<"User", 'String'>
   readonly role_as: Prisma.FieldRef<"User", 'String'>

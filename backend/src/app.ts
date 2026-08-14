@@ -9,6 +9,7 @@ import {
   isImageKitActive,
 } from "./lib/storage";
 import { errorHandler, notFound } from "./middleware/error-handler";
+import { accountRouter } from "./routes/account.routes";
 import { adminRouter } from "./routes/admin.routes";
 import { authRouter } from "./routes/auth.routes";
 import { cartRouter, wishlistRouter } from "./routes/cart.routes";
@@ -83,6 +84,7 @@ export function createApp() {
   app.use("/home", homeRouter);
   app.use("/contact", contactRouter);
   app.use("/auth", authRouter);
+  app.use("/account", accountRouter);
   app.use("/uploads", mediaRouter);
   app.use("/products", productRouter);
   app.use("/categories", categoryRouter);

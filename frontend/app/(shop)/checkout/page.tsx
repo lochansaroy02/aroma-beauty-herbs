@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 
 import { CheckoutForm } from "@/components/shop/checkout-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  CouponBox,
+  CouponProvider,
+  CouponTotals,
+} from "@/components/shop/coupon-box";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { apiGet } from "@/lib/api";
@@ -57,6 +62,9 @@ export default async function CheckoutPage() {
         </Alert>
       ) : null}
 
+      {/* The provider wraps both columns: the coupon is entered in the summary
+          and submitted by the form, so the state has to sit above the two. */}
+      <CouponProvider>
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start">
         <CheckoutForm
           defaults={{
@@ -123,10 +131,9 @@ export default async function CheckoutPage() {
 
             <Separator />
 
-            <div className="flex justify-between font-medium">
-              <span>Total</span>
-              <span className="tabular-nums">{formatPrice(total)}</span>
-            </div>
+            <CouponBox />
+
+            <CouponTotals total={total} />
 
             <p className="text-xs text-muted-foreground">
               Prices include GST. The API re-checks every price and stock level before
@@ -147,6 +154,7 @@ export default async function CheckoutPage() {
           </CardContent>
         </Card>
       </div>
+      </CouponProvider>
     </div>
   );
 }

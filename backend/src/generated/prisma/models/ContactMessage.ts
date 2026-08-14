@@ -48,6 +48,7 @@ export type ContactMessageMinAggregateOutputType = {
   subject: string | null
   message: string | null
   notified: boolean | null
+  status: $Enums.ContactStatus | null
   is_handled: boolean | null
   ip_hash: string | null
   created_at: Date | null
@@ -62,6 +63,7 @@ export type ContactMessageMaxAggregateOutputType = {
   subject: string | null
   message: string | null
   notified: boolean | null
+  status: $Enums.ContactStatus | null
   is_handled: boolean | null
   ip_hash: string | null
   created_at: Date | null
@@ -76,6 +78,7 @@ export type ContactMessageCountAggregateOutputType = {
   subject: number
   message: number
   notified: number
+  status: number
   is_handled: number
   ip_hash: number
   created_at: number
@@ -100,6 +103,7 @@ export type ContactMessageMinAggregateInputType = {
   subject?: true
   message?: true
   notified?: true
+  status?: true
   is_handled?: true
   ip_hash?: true
   created_at?: true
@@ -114,6 +118,7 @@ export type ContactMessageMaxAggregateInputType = {
   subject?: true
   message?: true
   notified?: true
+  status?: true
   is_handled?: true
   ip_hash?: true
   created_at?: true
@@ -128,6 +133,7 @@ export type ContactMessageCountAggregateInputType = {
   subject?: true
   message?: true
   notified?: true
+  status?: true
   is_handled?: true
   ip_hash?: true
   created_at?: true
@@ -229,6 +235,7 @@ export type ContactMessageGroupByOutputType = {
   subject: string | null
   message: string
   notified: boolean
+  status: $Enums.ContactStatus
   is_handled: boolean
   ip_hash: string | null
   created_at: Date | null
@@ -266,6 +273,7 @@ export type ContactMessageWhereInput = {
   subject?: Prisma.StringNullableFilter<"ContactMessage"> | string | null
   message?: Prisma.StringFilter<"ContactMessage"> | string
   notified?: Prisma.BoolFilter<"ContactMessage"> | boolean
+  status?: Prisma.EnumContactStatusFilter<"ContactMessage"> | $Enums.ContactStatus
   is_handled?: Prisma.BoolFilter<"ContactMessage"> | boolean
   ip_hash?: Prisma.StringNullableFilter<"ContactMessage"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"ContactMessage"> | Date | string | null
@@ -280,6 +288,7 @@ export type ContactMessageOrderByWithRelationInput = {
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
   message?: Prisma.SortOrder
   notified?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   is_handled?: Prisma.SortOrder
   ip_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -297,6 +306,7 @@ export type ContactMessageWhereUniqueInput = Prisma.AtLeast<{
   subject?: Prisma.StringNullableFilter<"ContactMessage"> | string | null
   message?: Prisma.StringFilter<"ContactMessage"> | string
   notified?: Prisma.BoolFilter<"ContactMessage"> | boolean
+  status?: Prisma.EnumContactStatusFilter<"ContactMessage"> | $Enums.ContactStatus
   is_handled?: Prisma.BoolFilter<"ContactMessage"> | boolean
   ip_hash?: Prisma.StringNullableFilter<"ContactMessage"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"ContactMessage"> | Date | string | null
@@ -311,6 +321,7 @@ export type ContactMessageOrderByWithAggregationInput = {
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
   message?: Prisma.SortOrder
   notified?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   is_handled?: Prisma.SortOrder
   ip_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -333,6 +344,7 @@ export type ContactMessageScalarWhereWithAggregatesInput = {
   subject?: Prisma.StringNullableWithAggregatesFilter<"ContactMessage"> | string | null
   message?: Prisma.StringWithAggregatesFilter<"ContactMessage"> | string
   notified?: Prisma.BoolWithAggregatesFilter<"ContactMessage"> | boolean
+  status?: Prisma.EnumContactStatusWithAggregatesFilter<"ContactMessage"> | $Enums.ContactStatus
   is_handled?: Prisma.BoolWithAggregatesFilter<"ContactMessage"> | boolean
   ip_hash?: Prisma.StringNullableWithAggregatesFilter<"ContactMessage"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"ContactMessage"> | Date | string | null
@@ -346,6 +358,7 @@ export type ContactMessageCreateInput = {
   subject?: string | null
   message: string
   notified?: boolean
+  status?: $Enums.ContactStatus
   is_handled?: boolean
   ip_hash?: string | null
   created_at?: Date | string | null
@@ -360,6 +373,7 @@ export type ContactMessageUncheckedCreateInput = {
   subject?: string | null
   message: string
   notified?: boolean
+  status?: $Enums.ContactStatus
   is_handled?: boolean
   ip_hash?: string | null
   created_at?: Date | string | null
@@ -373,6 +387,7 @@ export type ContactMessageUpdateInput = {
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumContactStatusFieldUpdateOperationsInput | $Enums.ContactStatus
   is_handled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -387,6 +402,7 @@ export type ContactMessageUncheckedUpdateInput = {
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumContactStatusFieldUpdateOperationsInput | $Enums.ContactStatus
   is_handled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -401,6 +417,7 @@ export type ContactMessageCreateManyInput = {
   subject?: string | null
   message: string
   notified?: boolean
+  status?: $Enums.ContactStatus
   is_handled?: boolean
   ip_hash?: string | null
   created_at?: Date | string | null
@@ -414,6 +431,7 @@ export type ContactMessageUpdateManyMutationInput = {
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumContactStatusFieldUpdateOperationsInput | $Enums.ContactStatus
   is_handled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -428,6 +446,7 @@ export type ContactMessageUncheckedUpdateManyInput = {
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumContactStatusFieldUpdateOperationsInput | $Enums.ContactStatus
   is_handled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -442,6 +461,7 @@ export type ContactMessageCountOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   message?: Prisma.SortOrder
   notified?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   is_handled?: Prisma.SortOrder
   ip_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -460,6 +480,7 @@ export type ContactMessageMaxOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   message?: Prisma.SortOrder
   notified?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   is_handled?: Prisma.SortOrder
   ip_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -474,6 +495,7 @@ export type ContactMessageMinOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   message?: Prisma.SortOrder
   notified?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   is_handled?: Prisma.SortOrder
   ip_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -482,6 +504,10 @@ export type ContactMessageMinOrderByAggregateInput = {
 
 export type ContactMessageSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+}
+
+export type EnumContactStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ContactStatus
 }
 
 
@@ -494,6 +520,7 @@ export type ContactMessageSelect<ExtArgs extends runtime.Types.Extensions.Intern
   subject?: boolean
   message?: boolean
   notified?: boolean
+  status?: boolean
   is_handled?: boolean
   ip_hash?: boolean
   created_at?: boolean
@@ -508,6 +535,7 @@ export type ContactMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   subject?: boolean
   message?: boolean
   notified?: boolean
+  status?: boolean
   is_handled?: boolean
   ip_hash?: boolean
   created_at?: boolean
@@ -522,6 +550,7 @@ export type ContactMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   subject?: boolean
   message?: boolean
   notified?: boolean
+  status?: boolean
   is_handled?: boolean
   ip_hash?: boolean
   created_at?: boolean
@@ -536,13 +565,14 @@ export type ContactMessageSelectScalar = {
   subject?: boolean
   message?: boolean
   notified?: boolean
+  status?: boolean
   is_handled?: boolean
   ip_hash?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type ContactMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "subject" | "message" | "notified" | "is_handled" | "ip_hash" | "created_at" | "updated_at", ExtArgs["result"]["contactMessage"]>
+export type ContactMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "subject" | "message" | "notified" | "status" | "is_handled" | "ip_hash" | "created_at" | "updated_at", ExtArgs["result"]["contactMessage"]>
 
 export type $ContactMessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ContactMessage"
@@ -558,6 +588,13 @@ export type $ContactMessagePayload<ExtArgs extends runtime.Types.Extensions.Inte
      * * Whether the notification email actually went out.
      */
     notified: boolean
+    /**
+     * *
+     *    * Where staff have got to with this enquiry. Superseded `is_handled`, which
+     *    * only had two states and was never written by anything — it is kept so the
+     *    * column doesn't have to be dropped, but nothing reads it.
+     */
+    status: $Enums.ContactStatus
     is_handled: boolean
     ip_hash: string | null
     created_at: Date | null
@@ -992,6 +1029,7 @@ export interface ContactMessageFieldRefs {
   readonly subject: Prisma.FieldRef<"ContactMessage", 'String'>
   readonly message: Prisma.FieldRef<"ContactMessage", 'String'>
   readonly notified: Prisma.FieldRef<"ContactMessage", 'Boolean'>
+  readonly status: Prisma.FieldRef<"ContactMessage", 'ContactStatus'>
   readonly is_handled: Prisma.FieldRef<"ContactMessage", 'Boolean'>
   readonly ip_hash: Prisma.FieldRef<"ContactMessage", 'String'>
   readonly created_at: Prisma.FieldRef<"ContactMessage", 'DateTime'>

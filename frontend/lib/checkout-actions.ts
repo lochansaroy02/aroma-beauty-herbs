@@ -19,7 +19,18 @@ export type CheckoutFields = {
   country?: string;
   notes?: string;
   save_address?: boolean;
+  /** Re-validated by the API at order time, never trusted from the preview. */
+  coupon_code?: string;
 };
+
+export type ApplyCouponResult =
+  | {
+      ok: true;
+      coupon: { id: number; code: string; name: string | null; description: string | null };
+      discount: number;
+      totals: { subtotal: number; discount: number; shipping: number; total: number };
+    }
+  | { ok: false; error: string };
 
 export type PlaceOrderResult =
   | { ok: true; order: Order; payment: PaymentIntent }
@@ -28,6 +39,33 @@ export type PlaceOrderResult =
 export type VerifyResult = { ok: true; order: Order } | { ok: false; error: string };
 
 const SIGNED_OUT = "Your session expired. Log in again.";
+
+/**
+ * Checks a coupon against the cart as it stands and reports what it's worth.
+ *
+ * A preview: nothing is stored and no use is spent. The order endpoint resolves
+ * the code again, so a coupon that lapses in between is caught there rather
+ * than honoured.
+ */
+export async function applyCouponAction(code: string): Promise<ApplyCouponResult> {
+  const token = await getSessionToken();
+  if (!token) return { ok: false, error: SIGNED_OUT };
+
+  const result = await apiPost<{
+    coupon: { id: number; code: string; name: string | null; description: string | null };
+    discount: number;
+    totals: { subtotal: number; discount: number; shipping: number; total: number };
+  }>("/checkout/coupon", { code }, token);
+
+  if (!result.ok) return { ok: false, error: result.error };
+
+  return {
+    ok: true,
+    coupon: result.data.coupon,
+    discount: result.data.discount,
+    totals: result.data.totals,
+  };
+}
 
 /**
  * Creates the order and, when Razorpay is configured, the matching Razorpay

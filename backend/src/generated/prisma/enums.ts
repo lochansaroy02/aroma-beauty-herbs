@@ -47,6 +47,15 @@ export const CouponType = {
 export type CouponType = (typeof CouponType)[keyof typeof CouponType]
 
 
+export const ContactStatus = {
+  pending: 'pending',
+  working: 'working',
+  completed: 'completed'
+} as const
+
+export type ContactStatus = (typeof ContactStatus)[keyof typeof ContactStatus]
+
+
 export const StockTxnType = {
   IN: 'IN',
   OUT: 'OUT',
