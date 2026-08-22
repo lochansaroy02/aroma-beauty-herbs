@@ -95,7 +95,14 @@ export default async function AdminQueriesPage(props: PageProps<"/admin/queries"
             ))}
           </div>
 
-          <div>
+          {/*
+            min-w-0 is load-bearing. A grid item defaults to min-width:auto,
+            which refuses to shrink below its content's intrinsic width — so the
+            wide table below stretched this cell to ~1100px and dragged the whole
+            admin shell into a sideways scroll, defeating the card's own
+            overflow-x-auto. Zero here lets the card clip and scroll as intended.
+          */}
+          <div className="min-w-0">
             <ContactFilters search={search} status={status} sort={sort} limit={limit} />
 
             {result.data.messages.length === 0 ? (

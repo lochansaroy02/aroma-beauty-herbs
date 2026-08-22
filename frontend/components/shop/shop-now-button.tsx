@@ -46,7 +46,15 @@ export function ShopNowButton({
       className={cn(
         // A square ink slab in mono caps: the shop's primary action, matching
         // the hero's call to action and the contact form's send button.
-        "inline-flex items-center justify-center gap-2.5 bg-ink font-mono tracking-[0.18em] text-paper uppercase transition-colors",
+        //
+        // `relative` is load-bearing, not decoration. The sr-only span below is
+        // position:absolute, and without a positioned ancestor its containing
+        // block is the viewport — so inside the homepage's horizontally
+        // scrolling featured row it anchored to the document instead of to this
+        // button, and dragged the page's scroll width out to where the fourth
+        // card sat. That was a real 535px phantom horizontal scroll on every
+        // phone. Any absolutely positioned child needs this.
+        "relative inline-flex items-center justify-center gap-2.5 bg-ink font-mono tracking-[0.18em] text-paper uppercase transition-colors",
         "hover:bg-leaf focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink",
         !inStock && "bg-ink/70",
         SIZES[size],

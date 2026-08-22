@@ -73,7 +73,7 @@ export function SiteHeader({ signedIn, announcement }: Props) {
               <Link
                 href="/admin"
                 aria-label="Admin"
-                className="rounded-full p-2 text-ink transition-colors hover:bg-ink/5"
+                className="inline-flex size-11 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5"
               >
                 <LayoutDashboardIcon className="size-[18px]" strokeWidth={1.5} />
               </Link>
@@ -83,22 +83,33 @@ export function SiteHeader({ signedIn, announcement }: Props) {
 
         <nav
           aria-label="Main"
-          className="mx-auto w-full max-w-7xl overflow-x-auto px-4 pb-3 sm:px-8"
+          className="mx-auto w-full max-w-7xl overflow-x-auto px-4 pb-1 sm:px-8"
         >
           <ul className="flex items-center justify-center gap-6 whitespace-nowrap sm:gap-9">
             {NAV.map((item) => (
               <li key={item.href}>
+                {/*
+                  Padding on the link, underline on the span inside it. The tap
+                  area needs to be finger-sized (this was 23px tall, which is a
+                  miss as often as a hit); the rule under the word has to stay
+                  tight to the word. Splitting them lets both be true.
+                */}
                 <Link
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}
                   className={cn(
-                    "inline-block border-b pb-0.5 text-[13px] transition-colors",
-                    isActive(item.href)
-                      ? "border-ink text-ink"
-                      : "border-transparent text-ink-soft hover:text-ink"
+                    "inline-flex items-center px-1 py-2.5 text-[13px] transition-colors",
+                    isActive(item.href) ? "text-ink" : "text-ink-soft hover:text-ink"
                   )}
                 >
-                  {item.label}
+                  <span
+                    className={cn(
+                      "border-b pb-0.5",
+                      isActive(item.href) ? "border-ink" : "border-transparent"
+                    )}
+                  >
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             ))}

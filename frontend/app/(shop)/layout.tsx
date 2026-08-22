@@ -52,12 +52,17 @@ export default async function ShopLayout({ children }: LayoutProps<"/">) {
             <p className="font-mono text-[11px] tracking-[0.22em] text-clay uppercase">
               Explore
             </p>
-            <ul className="mt-5 grid gap-3">
+            {/*
+              gap-3 with a 17px-tall link left more dead space between targets
+              than target. Moving the spacing into the links themselves keeps the
+              list looking the same while making each row a comfortable tap.
+            */}
+            <ul className="mt-4 grid gap-0.5">
               {FOOTER_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline"
+                    className="inline-block py-2 text-sm text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline"
                   >
                     {link.label}
                   </Link>
