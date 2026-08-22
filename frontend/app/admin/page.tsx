@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { RefreshCatalogueButton } from "@/components/admin/refresh-catalogue-button";
 import { Card } from "@/components/ui/card";
 import { fetchContactMessages } from "@/lib/admin-contact";
 import { fetchShopProducts } from "@/lib/shop-api";
@@ -113,17 +114,24 @@ export default async function AdminDashboardPage() {
                 </span>
               )}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Cached for 5 minutes. Edited a product over there? Refresh to pull it
+              through now.
+            </p>
           </div>
 
-          <a
-            href="https://barbersyndicate.in"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 text-sm underline underline-offset-4"
-          >
-            Storefront
-            <ExternalLinkIcon className="size-3.5" strokeWidth={1.5} />
-          </a>
+          <div className="flex shrink-0 items-center gap-3">
+            <RefreshCatalogueButton />
+            <a
+              href="https://barbersyndicate.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm underline underline-offset-4"
+            >
+              Storefront
+              <ExternalLinkIcon className="size-3.5" strokeWidth={1.5} />
+            </a>
+          </div>
         </div>
 
         {products.length > 0 ? (

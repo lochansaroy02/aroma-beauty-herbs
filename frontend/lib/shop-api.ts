@@ -32,8 +32,23 @@ const BRAND = "aroma-beauty-herbs";
  * which this site can be wrong about them. Five minutes is short enough that a
  * price change shows up the same session and long enough that the landing page
  * isn't hammering their API once per visitor.
+ *
+ * Note the expiry is stale-while-revalidate: the first request after it lapses
+ * is served the OLD copy and only triggers the refetch in the background, so on
+ * a quiet site the first visitor after a change still sees stale copy. That is
+ * why CATALOGUE_TAG exists — see `refreshCatalogueAction`.
  */
 const REVALIDATE_SECONDS = 300;
+
+/**
+ * Cache tag for every catalogue fetch, so all four can be dropped at once.
+ *
+ * Editing a product on barbersyndicate.in cannot notify this site, and waiting
+ * out the window means the first person to look gets yesterday's copy — with
+ * links to yesterday's slugs, which 404 once a product is renamed. Revalidating
+ * this tag makes an edit visible on the next request instead.
+ */
+export const CATALOGUE_TAG = "shop-catalogue";
 
 /**
  * The range, in the order it should appear.
@@ -203,7 +218,7 @@ export async function fetchShopProduct(key: string): Promise<ShopProduct | null>
   try {
     response = await fetch(
       `${API_BASE}/products/brand/${BRAND}/${encodeURIComponent(key)}`,
-      { next: { revalidate: REVALIDATE_SECONDS } }
+      { next: { revalidate: REVALIDATE_SECONDS, tags: [CATALOGUE_TAG] } }
     );
   } catch {
     return null;
