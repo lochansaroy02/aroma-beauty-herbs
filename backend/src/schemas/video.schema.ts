@@ -44,25 +44,6 @@ export const uploadedVideoSchema = z.object({
 
 export type UploadedVideoInput = z.infer<typeof uploadedVideoSchema>;
 
-/**
- * Blank strings arrive from HTML forms for untouched optional fields. On create,
- * "not supplied" and "supplied as blank" both mean no product.
- */
-const optionalProductId = z
-  .union([z.coerce.number().int().positive(), z.literal("")])
-  .nullish()
-  .transform((value) => (value === "" || value === undefined || value === null ? null : value));
-
-/**
- * The PATCH version must keep those two cases apart: absent means "leave the
- * product alone", blank or null means "unlink it". Collapsing absent to null
- * would make every partial update — even a status toggle — clear the link.
- */
-const patchProductId = z
-  .union([z.coerce.number().int().positive(), z.literal(""), z.null()])
-  .optional()
-  .transform((value) => (value === "" || value === null ? null : value));
-
 const statusFlag = z
   .union([z.boolean(), z.literal("true"), z.literal("false"), z.literal("on"), z.literal("")])
   .optional()
@@ -70,8 +51,6 @@ const statusFlag = z
 
 export const createVideoSchema = z.object({
   title: z.string().trim().min(2, "Title must be at least 2 characters").max(180),
-  /** Optional: a video can be about the brand rather than one product. */
-  product_id: optionalProductId,
   video: uploadedVideoSchema,
   is_active: statusFlag,
   order_by: z.coerce.number().int().min(0).max(9999).optional().default(0),
@@ -83,7 +62,6 @@ export type CreateVideoInput = z.infer<typeof createVideoSchema>;
 export const updateVideoSchema = z
   .object({
     title: z.string().trim().min(2).max(180).optional(),
-    product_id: patchProductId,
     /** Supplying a new file replaces the old one, which is then deleted. */
     video: uploadedVideoSchema.optional(),
     is_active: z.boolean().optional(),

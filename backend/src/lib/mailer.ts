@@ -10,7 +10,6 @@ import {
   isSmtpIncomplete,
   mailFromAddress,
 } from "./env";
-import { OTP_TTL_MINUTES } from "./otp";
 
 let transporter: Transporter | null = null;
 
@@ -115,78 +114,12 @@ const LEAF = "#007A55";
 const PAPER = "#F6F3EA";
 const PAPER_DEEP = "#ECE8DC";
 
-function otpHtml(greeting: string, otp: string): string {
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>${escapeHtml(env.APP_NAME)} verification code</title>
-</head>
-<body style="margin:0;padding:0;background:${PAPER};">
-<!-- Preheader: the grey line the inbox shows next to the subject. Without one
-     the client grabs whatever text comes first, which looks broken. -->
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Your ${escapeHtml(env.APP_NAME)} code is ${otp}. It expires in ${OTP_TTL_MINUTES} minutes.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${PAPER};padding:32px 16px;">
-<tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background:#FFFFFF;border:1px solid ${PAPER_DEEP};border-radius:12px;">
-<tr><td style="padding:32px 32px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-
-<p style="margin:0 0 24px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:${LEAF};font-weight:600;">${escapeHtml(env.APP_NAME)}</p>
-
-<p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:${INK};">${escapeHtml(greeting)}</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:${INK};">Use this code to verify your email address:</p>
-
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-<tr><td align="center" style="background:${PAPER};border-radius:10px;padding:20px 12px;">
-<span style="font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:34px;font-weight:700;letter-spacing:9px;color:${INK};">${otp}</span>
-</td></tr>
-</table>
-
-<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:${INK_SOFT};">It expires in ${OTP_TTL_MINUTES} minutes and can be used once.</p>
-<p style="margin:12px 0 0;font-size:14px;line-height:1.6;color:${INK_SOFT};">If you didn't ask for this, no action is needed — someone likely mistyped their address. Please don't forward this code to anyone.</p>
-
-</td></tr>
-<tr><td style="padding:0 32px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-<hr style="border:none;border-top:1px solid ${PAPER_DEEP};margin:0 0 16px;">
-<p style="margin:0;font-size:12px;line-height:1.6;color:${INK_SOFT};">
-${escapeHtml(env.APP_NAME)} · <a href="${escapeHtml(env.APP_URL)}" style="color:${LEAF};text-decoration:none;">${escapeHtml(env.APP_URL.replace(/^https?:\/\//, ""))}</a><br>
-You're receiving this automated security message because this address was used to sign up. It is not marketing, so there is nothing to unsubscribe from.
-</p>
-</td></tr>
-</table>
-</td></tr>
-</table>
-</body>
-</html>`;
-}
-
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-export function sendOtpEmail(to: string, otp: string, name?: string | null) {
-  const greeting = name ? `Hi ${name},` : "Hi,";
-
-  return send({
-    to,
-    // The code in the subject line lets a phone show it on the lock screen —
-    // and it varies per message, which is also what keeps Gmail from threading.
-    subject: `${otp} is your ${env.APP_NAME} verification code`,
-    text:
-      `${greeting}\n\n` +
-      `Use this code to verify your email address:\n\n` +
-      `    ${otp}\n\n` +
-      `It expires in ${OTP_TTL_MINUTES} minutes and can be used once.\n\n` +
-      `If you didn't ask for this, no action is needed. Please don't forward this code to anyone.\n\n` +
-      `${env.APP_NAME}\n${env.APP_URL}\n`,
-    html: otpHtml(greeting, otp),
-  });
 }
 
 /**
@@ -252,7 +185,7 @@ export async function verifyMailer(): Promise<void> {
           "check the names in backend/.env (GMAIL_USER and GMAIL_APP_PASSWORD are not read)."
       );
     } else {
-      console.warn("SMTP not configured — OTP emails will be logged to the console.");
+      console.warn("SMTP not configured — contact emails will be logged to the console.");
     }
     return;
   }

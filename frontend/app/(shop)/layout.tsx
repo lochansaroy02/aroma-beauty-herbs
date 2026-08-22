@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { SiteHeader } from "@/components/shop/site-header";
-import { fetchCart, fetchWishlist } from "@/lib/cart";
 import { fetchHome } from "@/lib/home";
 import { getSessionToken } from "@/lib/session";
 
@@ -15,20 +14,13 @@ const FOOTER_LINKS = [
 ] as const;
 
 export default async function ShopLayout({ children }: LayoutProps<"/">) {
-  // Cart and wishlist return empty for a signed-out visitor, and the home
-  // fetch is only here for the announcement bar, which sits above every page.
-  const [token, cart, wishlist, home] = await Promise.all([
-    getSessionToken(),
-    fetchCart(),
-    fetchWishlist(),
-    fetchHome(),
-  ]);
+  // The home fetch is only here for the announcement bar, which sits above
+  // every page. The token decides whether the header offers an admin link.
+  const [token, home] = await Promise.all([getSessionToken(), fetchHome()]);
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-paper text-ink">
       <SiteHeader
-        cartCount={cart.summary.total_quantity}
-        wishlistCount={wishlist.count}
         signedIn={Boolean(token)}
         // The bar lives in the header, but its show/hide switch is in
         // Customisation alongside the other blocks, so honour it here.

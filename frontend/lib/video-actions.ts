@@ -18,7 +18,6 @@ function refresh() {
 
 export async function createVideoAction(input: {
   title: string;
-  productId: string;
   video: UploadedVideo;
   isActive: boolean;
 }): Promise<VideoResult> {
@@ -29,8 +28,6 @@ export async function createVideoAction(input: {
     "/admin/videos",
     {
       title: input.title,
-      // Empty string means "no product"; the API maps it to null.
-      product_id: input.productId,
       video: input.video,
       is_active: input.isActive,
     },

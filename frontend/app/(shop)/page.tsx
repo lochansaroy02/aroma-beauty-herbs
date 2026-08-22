@@ -3,6 +3,7 @@ import { HeroFallback, HeroVideo } from "@/components/shop/hero-video";
 import { MarqueeStrip } from "@/components/shop/marquee-strip";
 import { TileGrid } from "@/components/shop/tile-grid";
 import { fetchHome } from "@/lib/home";
+import { fetchShopProducts } from "@/lib/shop-api";
 import type { SectionKey } from "@/lib/catalog";
 
 export const metadata = {
@@ -12,7 +13,12 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const home = await fetchHome();
+  /**
+   * Two sources, fetched together: the blocks and their arrangement are ours
+   * and come from the API; the products in the featured row belong to
+   * barbersyndicate.in and come from theirs.
+   */
+  const [home, products] = await Promise.all([fetchHome(), fetchShopProducts()]);
 
   // Order, visibility and per-block layout all come from Admin → Customisation.
   // The announcement bar is rendered by the shop layout's header, so it has a
@@ -30,7 +36,7 @@ export default async function HomePage() {
       case "strip_a":
         return firstStrip ? <MarqueeStrip strip={firstStrip} /> : null;
       case "featured":
-        return <FeaturedRow products={home.featured} layout={layout ?? "row"} />;
+        return <FeaturedRow products={products} layout={layout ?? "row"} />;
       case "strip_b":
         return secondStrip ? <MarqueeStrip strip={secondStrip} /> : null;
       case "tiles":

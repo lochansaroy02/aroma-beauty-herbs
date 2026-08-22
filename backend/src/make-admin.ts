@@ -1,5 +1,5 @@
 /**
- * Promotes an existing account to Admin, so it can upload product images.
+ * Promotes an existing account to Admin, so it can edit the homepage.
  *
  *   npm run make:admin you@example.com
  *

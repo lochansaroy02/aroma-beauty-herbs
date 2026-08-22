@@ -2,34 +2,26 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const SESSION_COOKIE = "abh_session";
-const AUTH_ROUTES = ["/login", "/signup", "/verify"];
 
 /**
  * Optimistic routing only — presence of the cookie, not proof it's valid.
- * Pages still confirm the session against the API before trusting it.
+ * The admin layout still confirms the session against the API before trusting
+ * it, so this is a redirect for the common case, never the security boundary.
+ *
+ * Only /admin is guarded now. The shop pages are public and stateless: there is
+ * no cart, no wishlist, no order history and no customer account to protect.
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
 
-  const needsSession =
-    pathname.startsWith("/account") ||
-    pathname.startsWith("/admin") ||
-    // Cart, checkout, orders and wishlist belong to an account; the shop
-    // itself stays public.
-    pathname.startsWith("/cart") ||
-    pathname.startsWith("/checkout") ||
-    pathname.startsWith("/orders") ||
-    pathname.startsWith("/wishlist");
-
-  if (!hasSession && needsSession) {
+  if (!hasSession && pathname.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Already signed in: the shop is the landing page. The role lives in the JWT,
-  // which isn't readable here, so admins get routed on from /products.
-  if (hasSession && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL("/products", request.url));
+  // Already signed in: /login has nothing to offer, so go where they were going.
+  if (hasSession && pathname.startsWith("/login")) {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return NextResponse.next();
@@ -38,20 +30,5 @@ export function proxy(request: NextRequest) {
 export const config = {
   // "/admin" is listed alongside "/admin/:path*" so the dashboard root is
   // guarded too, not just its subpaths.
-  matcher: [
-    "/account/:path*",
-    "/admin",
-    "/admin/:path*",
-    "/cart",
-    "/cart/:path*",
-    "/checkout",
-    "/checkout/:path*",
-    "/orders",
-    "/orders/:path*",
-    "/wishlist",
-    "/wishlist/:path*",
-    "/login",
-    "/signup",
-    "/verify",
-  ],
+  matcher: ["/admin", "/admin/:path*", "/login"],
 };

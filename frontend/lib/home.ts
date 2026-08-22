@@ -7,7 +7,6 @@ const EMPTY: HomeContent = {
   announcement: null,
   hero: null,
   strips: [],
-  featured: [],
   tiles: [],
   // Defaults, so an unreachable API still renders the blocks in their intended
   // order rather than nothing at all.

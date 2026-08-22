@@ -8,7 +8,7 @@
  * on their own.
  */
 import { env, isSmtpConfigured } from "./lib/env";
-import { describeSmtpError, sendOtpEmail, verifyMailer } from "./lib/mailer";
+import { describeSmtpError, sendContactEmail, verifyMailer } from "./lib/mailer";
 
 async function main() {
   if (!isSmtpConfigured) {
@@ -33,11 +33,22 @@ async function main() {
 
   await verifyMailer();
 
-  const to = process.argv[2] ?? env.SMTP_USER;
-  console.log(`\nSending a sample code to ${to}...`);
+  // sendContactEmail always delivers to CONTACT_EMAIL — that is the point of it.
+  // The address given here becomes the Reply-To, standing in for the enquirer.
+  const replyTo = process.argv[2] ?? env.SMTP_USER;
+  const destination = env.CONTACT_EMAIL || env.SMTP_USER;
+  console.log(`\nSending a sample enquiry to ${destination} (reply-to ${replyTo})...`);
 
   try {
-    await sendOtpEmail(to, "123456", "there");
+    // The contact notification is the only mail this app sends, so testing it
+    // tests the real path rather than a shape nothing else uses.
+    await sendContactEmail({
+      name: "SMTP test",
+      email: replyTo,
+      subject: "SMTP test",
+      message: "If you can read this, the mail configuration works.",
+      reference: 0,
+    });
     console.log("Sent. Check the inbox (and the spam folder).");
   } catch (error) {
     console.error("Send failed:", describeSmtpError(error));

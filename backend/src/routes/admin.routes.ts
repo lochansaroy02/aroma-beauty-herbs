@@ -6,27 +6,9 @@ import {
   updateContactStatus,
 } from "../controllers/admin-contact.controller";
 import {
-  createCoupon,
-  deleteCoupon,
-  listCoupons,
-  toggleCouponStatus,
-  updateCoupon,
-} from "../controllers/admin-coupon.controller";
-import {
-  getAdminOrder,
-  listAdminOrders,
-  updateOrderStatus,
-} from "../controllers/admin-order.controller";
-import {
-  getAdminProduct,
-  listAdminProducts,
-  updateProduct,
-} from "../controllers/admin-product.controller";
-import {
   getMediaSettings,
   updateMediaSettings,
 } from "../controllers/admin-settings.controller";
-import { getOrderStats } from "../controllers/admin-stats.controller";
 import {
   createStrip,
   createTile,
@@ -41,30 +23,24 @@ import {
   updateTile,
 } from "../controllers/admin-home.controller";
 import {
-  adjustStock,
-  getStockHistory,
-  listInventory,
-  updateLowStockAlert,
-} from "../controllers/inventory.controller";
-import {
   createVideo,
   deleteVideo,
   getVideo,
   listVideos,
   updateVideo,
 } from "../controllers/video.controller";
-import { createBrand, createCategory } from "../controllers/taxonomy.controller";
 import { requireAdmin } from "../middleware/require-admin";
 import { requireAuth } from "../middleware/require-auth";
 
+/**
+ * Staff-only. What's left after the shop was removed: the homepage an admin
+ * composes, the videos and media behind it, and the contact enquiries it
+ * generates. The catalogue is no longer ours to edit — it lives on
+ * barbersyndicate.in and is read from their API.
+ */
 export const adminRouter = Router();
 
-// Everything under /admin is staff-only.
 adminRouter.use(requireAuth, requireAdmin);
-
-// Before /orders/:orderNumber would otherwise be a candidate — this is a
-// distinct resource, not an order number.
-adminRouter.get("/stats/orders", getOrderStats);
 
 // Runtime switches — currently just which storage new uploads go to.
 adminRouter.get("/settings/media", getMediaSettings);
@@ -86,35 +62,10 @@ adminRouter.post("/home/tiles/reorder", reorderTiles);
 adminRouter.patch("/home/tiles/:id", updateTile);
 adminRouter.delete("/home/tiles/:id", deleteTile);
 
-// Contact-form enquiries: the storefront writes them, staff triage them here.
+// Contact-form enquiries: the landing page writes them, staff triage them here.
 adminRouter.get("/contact", listContactMessages);
 adminRouter.patch("/contact/:id/status", updateContactStatus);
 adminRouter.delete("/contact/:id", deleteContactMessage);
-
-// Discount codes. `/:id/status` is the list's toggle; `/:id` is the full edit.
-adminRouter.get("/coupons", listCoupons);
-adminRouter.post("/coupons", createCoupon);
-adminRouter.patch("/coupons/:id", updateCoupon);
-adminRouter.patch("/coupons/:id/status", toggleCouponStatus);
-adminRouter.delete("/coupons/:id", deleteCoupon);
-
-adminRouter.get("/orders", listAdminOrders);
-adminRouter.get("/orders/:orderNumber", getAdminOrder);
-adminRouter.patch("/orders/:orderNumber/status", updateOrderStatus);
-
-adminRouter.get("/products", listAdminProducts);
-adminRouter.get("/products/:id", getAdminProduct);
-adminRouter.patch("/products/:id", updateProduct);
-
-// Brand and category are required on a product, so a database with no taxonomy
-// rows couldn't create one without these.
-adminRouter.post("/brands", createBrand);
-adminRouter.post("/categories", createCategory);
-
-adminRouter.get("/inventory", listInventory);
-adminRouter.post("/inventory/:variantId/adjust", adjustStock);
-adminRouter.patch("/inventory/:variantId/alert", updateLowStockAlert);
-adminRouter.get("/inventory/:variantId/history", getStockHistory);
 
 adminRouter.get("/videos", listVideos);
 adminRouter.post("/videos", createVideo);

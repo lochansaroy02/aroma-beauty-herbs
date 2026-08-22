@@ -1,5 +1,4 @@
-import { AlertCircleIcon, FilmIcon, PackageIcon } from "lucide-react";
-import Link from "next/link";
+import { AlertCircleIcon, FilmIcon } from "lucide-react";
 
 import { AddVideoDialog } from "@/components/admin/add-video-dialog";
 import { Pagination } from "@/components/admin/pagination";
@@ -7,7 +6,6 @@ import { VideoRowActions } from "@/components/admin/video-row-actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchProducts } from "@/lib/products";
 import { fetchVideos } from "@/lib/videos";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("en-IN", {
@@ -33,18 +31,7 @@ export default async function AdminVideosPage(props: PageProps<"/admin/videos">)
   const status = single(params["status"]);
   const page = Math.max(1, Number(single(params["page"])) || 1);
 
-  // The picker needs every product, not just the first page.
-  const [result, products] = await Promise.all([
-    fetchVideos({ page, status: status || undefined }),
-    fetchProducts({ limit: 60, sort: "name_asc" }),
-  ]);
-
-  const productOptions = products.ok
-    ? products.data.products.map((product) => ({
-        id: product.id,
-        name: product.product_name,
-      }))
-    : [];
+  const result = await fetchVideos({ page, status: status || undefined });
 
   const baseParams = new URLSearchParams();
   if (status) baseParams.set("status", status);
@@ -56,7 +43,7 @@ export default async function AdminVideosPage(props: PageProps<"/admin/videos">)
         <div>
           <h1 className="font-heading text-2xl tracking-tight">Videos</h1>
           <p className="text-sm text-muted-foreground">
-            Product videos, ready for wherever they end up on the storefront.
+            The hero video on the homepage, and the library behind it.
           </p>
         </div>
 
@@ -64,7 +51,7 @@ export default async function AdminVideosPage(props: PageProps<"/admin/videos">)
           {result.ok ? (
             <Badge variant="secondary">{result.data.pagination.total} total</Badge>
           ) : null}
-          <AddVideoDialog products={productOptions} />
+          <AddVideoDialog />
         </div>
       </div>
 
@@ -108,20 +95,8 @@ export default async function AdminVideosPage(props: PageProps<"/admin/videos">)
                       <p className="truncate font-medium">{item.title ?? "Untitled"}</p>
 
                       <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                        {item.product ? (
-                          <Link
-                            href={`/products/${item.product.slug}`}
-                            className="inline-flex items-center gap-1 hover:underline"
-                          >
-                            <PackageIcon className="size-3" />
-                            {item.product.product_name}
-                          </Link>
-                        ) : (
-                          <span>No product</span>
-                        )}
-
                         {item.video && duration(item.video.duration) ? (
-                          <span>· {duration(item.video.duration)}</span>
+                          <span>{duration(item.video.duration)}</span>
                         ) : null}
 
                         <span>

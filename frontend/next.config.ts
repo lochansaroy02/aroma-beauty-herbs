@@ -12,6 +12,18 @@ const mediaBase =
 
 const { protocol, hostname, port } = new URL(mediaBase);
 
+/**
+ * Where the product photos come from.
+ *
+ * The catalogue is Barber Syndicate's, and so are its images — next/image
+ * refuses any host not listed here, so without this every product renders as a
+ * broken frame. Kept as its own origin rather than folded into MEDIA_BASE_URL
+ * because the two are genuinely different systems: this one we only read.
+ */
+const shopImages = new URL(
+  process.env.SHOP_IMAGE_BASE ?? "https://barbersyndicate.in"
+);
+
 /** Defaults to every ik.imagekit.io account; set it for a custom domain. */
 const imageKitEndpoint =
   process.env.IMAGEKIT_URL_ENDPOINT ?? "https://ik.imagekit.io";
@@ -46,6 +58,11 @@ const nextConfig: NextConfig = {
       {
         protocol: imageKit.protocol.replace(":", "") as "http" | "https",
         hostname: imageKit.hostname,
+        pathname: "/**",
+      },
+      {
+        protocol: shopImages.protocol.replace(":", "") as "http" | "https",
+        hostname: shopImages.hostname,
         pathname: "/**",
       },
     ],

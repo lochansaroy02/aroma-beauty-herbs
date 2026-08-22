@@ -1,12 +1,6 @@
 import type { Request, Response } from "express";
 
 import {
-  LIVE_PRODUCT,
-  productInclude,
-  toProductCard,
-  type ProductWithRelations,
-} from "../lib/catalog";
-import {
   GALLERY_COLLECTION,
   MAIN_IMAGE_COLLECTION,
   VIDEO_COLLECTION,
@@ -15,7 +9,6 @@ import {
   toMediaPayload,
 } from "../lib/media";
 import { prisma } from "../lib/prisma";
-import { imagesByProduct } from "../lib/product-images";
 import { DEFAULT_LAYOUTS, SECTION_KEYS } from "../schemas/admin-home.schema";
 
 /**
@@ -52,7 +45,6 @@ async function loadHero() {
       subtitle: true,
       url: true,
       cta_label: true,
-      product: { select: { slug: true } },
     },
   });
 
@@ -74,8 +66,9 @@ async function loadHero() {
     id: section.id,
     title: section.title,
     subtitle: section.subtitle,
-    // An explicit link wins; otherwise fall back to the linked product.
-    url: section.url || (section.product?.slug ? `/products/${section.product.slug}` : null),
+    // Whatever the admin typed. With no local catalogue there is no product
+    // page to fall back to, so an empty field means the hero simply isn't a link.
+    url: section.url || null,
     cta_label: section.cta_label,
     video: toMediaPayload(file),
   };
@@ -118,26 +111,6 @@ async function loadSections() {
   }).sort((a, b) => a.position - b.position);
 }
 
-/**
- * The featured row. `is_featured` is the toggle and `order_by` is the running
- * order — both already editable in the product form, so no separate curation
- * screen is needed.
- */
-async function loadFeatured() {
-  const products = await prisma.product.findMany({
-    where: { ...LIVE_PRODUCT, is_featured: true },
-    include: productInclude,
-    orderBy: [{ order_by: "asc" }, { id: "desc" }],
-    take: 8,
-  });
-
-  const images = await imagesByProduct(products.map((product) => product.id));
-
-  return products.map((product: ProductWithRelations) =>
-    toProductCard(product, images.get(product.id))
-  );
-}
-
 async function loadTiles() {
   const banners = await prisma.smallBanner.findMany({
     where: { deleted_at: null, status: ACTIVE },
@@ -175,14 +148,19 @@ async function loadTiles() {
 
 /** GET /home */
 export async function getHome(_req: Request, res: Response) {
-  const [announcement, hero, strips, featured, tiles, sections] = await Promise.all([
+  const [announcement, hero, strips, tiles, sections] = await Promise.all([
     loadAnnouncement(),
     loadHero(),
     loadStrips(),
-    loadFeatured(),
     loadTiles(),
     loadSections(),
   ]);
 
-  return res.status(200).json({ announcement, hero, strips, featured, tiles, sections });
+  /**
+   * No `featured` key: the products in that block come from the
+   * barbersyndicate.in API and are fetched by the frontend directly. The block
+   * still appears here in `sections`, because its order, visibility and layout
+   * are still ours to edit — only its contents moved.
+   */
+  return res.status(200).json({ announcement, hero, strips, tiles, sections });
 }

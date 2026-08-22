@@ -22,7 +22,7 @@ import {
 
 /**
  * Videos live in `home_video_sections`; the file itself is a media row against
- * the section's polymorphic key, exactly like product images. `status` is the
+ * the section's polymorphic key. `status` is the
  * Laravel-style 1/0 int the rest of the schema uses.
  */
 const ACTIVE = 1;
@@ -31,12 +31,10 @@ const INACTIVE = 0;
 const videoSelect = {
   id: true,
   title: true,
-  product_id: true,
   order_by: true,
   status: true,
   created_at: true,
   updated_at: true,
-  product: { select: { id: true, product_name: true, slug: true } },
 } satisfies Prisma.HomeVideoSectionSelect;
 
 type VideoRow = Prisma.HomeVideoSectionGetPayload<{ select: typeof videoSelect }>;
@@ -68,7 +66,6 @@ function toVideoPayload(video: VideoRow, file: MediaRow | undefined) {
   return {
     id: video.id,
     title: video.title,
-    product: video.product,
     is_active: video.status === ACTIVE,
     order_by: video.order_by ?? 0,
     video: file ? toMediaPayload(file) : null,
@@ -97,20 +94,6 @@ function videoId(req: Request): number {
   const id = numericParam(req.params["id"]);
   if (!Number.isInteger(id)) throw new HttpError(400, "Video id must be a number");
   return id;
-}
-
-/** Rejects a product reference that doesn't exist, rather than a raw FK error. */
-async function assertProductExists(productId: number | null) {
-  if (productId === null) return;
-
-  const product = await prisma.product.findFirst({
-    where: { id: productId, deleted_at: null },
-    select: { id: true },
-  });
-
-  if (!product) {
-    throw new HttpError(422, "Validation failed", { product_id: ["Product not found"] });
-  }
 }
 
 /** GET /admin/videos — everything, including inactive. */
@@ -192,19 +175,10 @@ export async function createVideo(req: Request, res: Response) {
   const input = parsed.data;
 
   try {
-    await assertProductExists(input.product_id);
-  } catch (error) {
-    // Nothing will reference the upload, so don't leave it in the library.
-    await deleteMediaFiles([input.video]);
-    throw error;
-  }
-
-  try {
     const created = await prisma.$transaction(async (tx) => {
       const video = await tx.homeVideoSection.create({
         data: {
           title: input.title,
-          product_id: input.product_id,
           status: input.is_active ? ACTIVE : INACTIVE,
           order_by: input.order_by,
           created_by_id: req.auth?.userId ?? null,
@@ -229,7 +203,7 @@ export async function createVideo(req: Request, res: Response) {
 }
 
 /**
- * PATCH /admin/videos/:id — title, product, status, order, or a replacement
+ * PATCH /admin/videos/:id — title, status, order, or a replacement
  * file. Replacing deletes the old file once the new row is committed.
  */
 export async function updateVideo(req: Request, res: Response) {
@@ -252,10 +226,6 @@ export async function updateVideo(req: Request, res: Response) {
     throw new HttpError(404, "Video not found");
   }
 
-  if (input.product_id !== undefined) {
-    await assertProductExists(input.product_id);
-  }
-
   // Captured before the swap so the old file can be removed afterwards.
   const replaced = input.video
     ? await prisma.media.findMany({
@@ -274,7 +244,6 @@ export async function updateVideo(req: Request, res: Response) {
         where: { id },
         data: {
           ...(input.title !== undefined ? { title: input.title } : {}),
-          ...(input.product_id !== undefined ? { product_id: input.product_id } : {}),
           ...(input.is_active !== undefined
             ? { status: input.is_active ? ACTIVE : INACTIVE }
             : {}),

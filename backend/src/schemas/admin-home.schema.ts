@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { uploadedImageSchema } from "./product.schema";
+import { uploadedImageSchema } from "./uploaded-image.schema";
 
 /**
  * The homepage's editable furniture.

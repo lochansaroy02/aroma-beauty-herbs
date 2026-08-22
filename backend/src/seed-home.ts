@@ -7,8 +7,8 @@
  * duplicates. Everything it writes is editable afterwards; this only exists so
  * a fresh database renders a complete page instead of a skeleton.
  *
- * It does not touch products: the featured row is driven by each product's own
- * "Featured" toggle and Order by, both already in the product form.
+ * It does not touch products: the featured row is filled from the
+ * barbersyndicate.in API by the frontend, and there is nothing to seed for it.
  */
 import { prisma } from "./lib/prisma";
 //change 
@@ -71,16 +71,6 @@ async function main() {
     }
   }
   console.log(`Seeded ${TILES.length} grid tiles (add images from the admin later).`);
-
-  const featured = await prisma.product.count({
-    where: { deleted_at: null, status: 1, is_featured: true },
-  });
-
-  console.log(
-    featured > 0
-      ? `${featured} product(s) are marked Featured and will fill the product row.`
-      : "No products are marked Featured yet — tick Featured on a product to fill that row."
-  );
 
   const hero = await prisma.homeVideoSection.count({
     where: { deleted_at: null, status: 1 },

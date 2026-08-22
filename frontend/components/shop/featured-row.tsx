@@ -4,20 +4,24 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-import { formatPrice, type ProductCard } from "@/lib/catalog";
+import { ShopNowButton } from "@/components/shop/shop-now-button";
+import { formatPrice } from "@/lib/catalog";
+import type { ShopProduct } from "@/lib/shop-api";
 
 /**
- * The featured row.
+ * The featured row — the whole range, which is four kits.
  *
- * Which products appear and in what order is entirely the product record's
- * doing — the "Featured" toggle and "Order by" field on the product form — so
- * there's no second place to curate and no way for the two to disagree.
+ * There is no curation UI because there is nothing to curate: the products come
+ * from barbersyndicate.in's API in a fixed order (`PRODUCT_KEYS`), and with a
+ * range this size showing all of it is also the right editorial call. What Admin
+ * → Customisation still controls is this block's position, visibility and
+ * layout, which is where the useful choices actually are.
  */
 export function FeaturedRow({
   products,
   layout = "row",
 }: {
-  products: ProductCard[];
+  products: ShopProduct[];
   /** "row" keeps everything on one swipeable line; "grid" wraps. */
   layout?: string;
 }) {
@@ -43,10 +47,10 @@ export function FeaturedRow({
         {products.length === 0 ? (
           <div className="mx-auto mt-14 max-w-md border border-dashed border-ink/20 px-6 py-14 text-center">
             <LeafIcon className="mx-auto size-6 text-clay" strokeWidth={1.5} />
-            <p className="mt-4 font-heading text-lg text-ink">Nothing featured yet</p>
+            <p className="mt-4 font-heading text-lg text-ink">The range is loading</p>
             <p className="mt-2 text-sm text-ink-soft">
-              Tick <span className="text-ink">Featured</span> on a product and it appears
-              here, in its <span className="text-ink">Order by</span> position.
+              Products come from the Barber Syndicate catalogue. If this persists,
+              that API is unreachable from this server.
             </p>
           </div>
         ) : (
@@ -70,10 +74,10 @@ export function FeaturedRow({
               >
                 <Link href={`/products/${product.slug}`} className="block">
                   <div className="relative aspect-[4/5] overflow-hidden bg-paper-deep">
-                    {product.image ? (
+                    {product.images[0] ? (
                       <Image
-                        src={product.image.url}
-                        alt={product.image.alt ?? product.product_name}
+                        src={product.images[0].url}
+                        alt={product.name}
                         fill
                         sizes="(min-width: 1024px) 22vw, 45vw"
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
@@ -92,21 +96,25 @@ export function FeaturedRow({
                   </div>
 
                   <h3 className="mt-5 text-center font-heading text-[17px] leading-snug text-ink">
-                    {product.product_name}
+                    {product.name}
                   </h3>
 
-                  <p className="mt-1.5 text-center font-mono text-[13px] text-ink-soft">
-                    {product.price?.from ? "from " : ""}
-                    {formatPrice(product.price?.sale_price ?? null)}
+                  <p className="mt-1.5 flex items-baseline justify-center gap-2 text-center font-mono text-[13px] text-ink-soft">
+                    <span className="tabular-nums">{formatPrice(product.sale_price)}</span>
+                    {product.discounted ? (
+                      <span className="text-clay line-through tabular-nums">
+                        {formatPrice(product.mrp)}
+                      </span>
+                    ) : null}
                   </p>
                 </Link>
 
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="mt-5 block border border-ink/25 py-3 text-center font-mono text-[11px] tracking-[0.16em] text-ink uppercase transition-colors hover:border-ink hover:bg-ink hover:text-paper"
-                >
-                  {product.in_stock ? "Choose options" : "View"}
-                </Link>
+                <ShopNowButton
+                  href={product.shop_url}
+                  inStock={product.in_stock}
+                  size="sm"
+                  className="mt-5 w-full"
+                />
               </li>
             ))}
           </ul>

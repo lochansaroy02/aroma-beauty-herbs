@@ -1,15 +1,13 @@
 "use client";
 
-import { ShoppingBagIcon, UserIcon } from "lucide-react";
+import { LayoutDashboardIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ProductSearch } from "@/components/shop/product-search";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  cartCount: number;
-  wishlistCount: number;
+  /** Drives the admin shortcut only — visitors never sign in to this site. */
   signedIn: boolean;
   announcement: { text: string; url: string | null } | null;
 };
@@ -23,20 +21,7 @@ const NAV = [
   // { href: "/journal", label: "Journal" },
 ] as const;
 
-function CountBadge({ count }: { count: number }) {
-  if (count <= 0) return null;
-
-  return (
-    <span
-      className="absolute -right-1.5 -top-1 min-w-4 rounded-full bg-ink px-1 text-center font-mono text-[10px] leading-4 text-paper"
-      aria-hidden
-    >
-      {count > 9 ? "9+" : count}
-    </span>
-  );
-}
-
-export function SiteHeader({ cartCount, wishlistCount, signedIn, announcement }: Props) {
+export function SiteHeader({ signedIn, announcement }: Props) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -63,11 +48,11 @@ export function SiteHeader({ cartCount, wishlistCount, signedIn, announcement }:
 
       <div className="border-b border-ink/10 bg-paper/95 backdrop-blur">
         {/* Three equal columns keep the wordmark optically centred no matter
-            how wide the icon clusters get. */}
+            how wide the icon cluster gets. The left column is deliberately
+            empty — search went with the local catalogue, and four products need
+            a nav, not a search box — but the column stays so the centre holds. */}
         <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-4 sm:px-8">
-          <div className="flex items-center">
-            <ProductSearch />
-          </div>
+          <div aria-hidden />
 
           <Link
             href="/"
@@ -77,24 +62,22 @@ export function SiteHeader({ cartCount, wishlistCount, signedIn, announcement }:
             Aroma
           </Link>
 
+          {/*
+            No cart, no account: nothing is bought here. The only thing worth a
+            slot is the way back to the admin, and only for someone already
+            signed in — a "Log in" link on a landing page invites visitors to
+            try an account they can't have.
+          */}
           <div className="flex items-center justify-end gap-1">
-            <Link
-              href={signedIn ? "/account" : "/login"}
-              aria-label={signedIn ? "Your account" : "Log in"}
-              className="relative rounded-full p-2 text-ink transition-colors hover:bg-ink/5"
-            >
-              <UserIcon className="size-[18px]" strokeWidth={1.5} />
-              <CountBadge count={wishlistCount} />
-            </Link>
-
-            <Link
-              href="/cart"
-              aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
-              className="relative rounded-full p-2 text-ink transition-colors hover:bg-ink/5"
-            >
-              <ShoppingBagIcon className="size-[18px]" strokeWidth={1.5} />
-              <CountBadge count={cartCount} />
-            </Link>
+            {signedIn ? (
+              <Link
+                href="/admin"
+                aria-label="Admin"
+                className="rounded-full p-2 text-ink transition-colors hover:bg-ink/5"
+              >
+                <LayoutDashboardIcon className="size-[18px]" strokeWidth={1.5} />
+              </Link>
+            ) : null}
           </div>
         </div>
 

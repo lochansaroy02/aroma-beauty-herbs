@@ -9,30 +9,27 @@ import {
   isImageKitActive,
 } from "./lib/storage";
 import { errorHandler, notFound } from "./middleware/error-handler";
-import { accountRouter } from "./routes/account.routes";
 import { adminRouter } from "./routes/admin.routes";
 import { authRouter } from "./routes/auth.routes";
-import { cartRouter, wishlistRouter } from "./routes/cart.routes";
-import {
-  checkoutRouter,
-  orderRouter,
-  razorpayWebhookRouter,
-} from "./routes/checkout.routes";
 import { contactRouter } from "./routes/contact.routes";
 import { homeRouter } from "./routes/home.routes";
 import { mediaRouter } from "./routes/media.routes";
-import { productRouter } from "./routes/product.routes";
-import { brandRouter, categoryRouter } from "./routes/taxonomy.routes";
 import { videoRouter } from "./routes/video.routes";
 
+/**
+ * This API backs a landing page, not a shop.
+ *
+ * The catalogue, cart, checkout, orders and customer accounts were removed when
+ * the site became a storefront for barbersyndicate.in: products are read by the
+ * frontend straight from that site's public API, and "Shop now" links out. What
+ * remains is what the landing page can't get from anywhere else — the homepage
+ * composition an admin edits, the media and video library behind it, the
+ * contact form, and the admin login that gates all three.
+ */
 export function createApp() {
   const app = express();
 
   app.use(cors({ origin: env.CORS_ORIGIN }));
-
-  // Before express.json(): the Razorpay webhook's signature covers the raw
-  // bytes, which a JSON parse would destroy.
-  app.use(razorpayWebhookRouter);
 
   app.use(express.json());
 
@@ -84,15 +81,7 @@ export function createApp() {
   app.use("/home", homeRouter);
   app.use("/contact", contactRouter);
   app.use("/auth", authRouter);
-  app.use("/account", accountRouter);
   app.use("/uploads", mediaRouter);
-  app.use("/products", productRouter);
-  app.use("/categories", categoryRouter);
-  app.use("/brands", brandRouter);
-  app.use("/cart", cartRouter);
-  app.use("/wishlist", wishlistRouter);
-  app.use("/checkout", checkoutRouter);
-  app.use("/orders", orderRouter);
   app.use("/videos", videoRouter);
   app.use("/admin", adminRouter);
 

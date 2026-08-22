@@ -1,87 +1,64 @@
 import {
-  AlertCircleIcon,
-  BoxesIcon,
-  IndianRupeeIcon,
-  PackageIcon,
-  ShoppingCartIcon,
+  ExternalLinkIcon,
+  FilmIcon,
+  InboxIcon,
+  LayoutTemplateIcon,
 } from "lucide-react";
 import Link from "next/link";
 
-import { OrderTrendChart } from "@/components/admin/order-trend-chart";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
-import { fetchAdminOrders } from "@/lib/admin-orders";
-import { fetchOrderStats } from "@/lib/admin-stats";
-import { formatPrice, isStatGrain, type StatGrain } from "@/lib/catalog";
-import { fetchInventory } from "@/lib/inventory";
-import { fetchProducts } from "@/lib/products";
+import { fetchContactMessages } from "@/lib/admin-contact";
+import { fetchShopProducts } from "@/lib/shop-api";
+import { fetchVideos } from "@/lib/videos";
 
-export default async function AdminDashboardPage(props: PageProps<"/admin">) {
-  const params = await props.searchParams;
-  const rangeParam = Array.isArray(params["range"]) ? params["range"][0] : params["range"];
-  const grain: StatGrain = rangeParam && isStatGrain(rangeParam) ? rangeParam : "day";
-
-  // Only the counts are needed, so ask for the smallest page possible.
-  const [products, orders, inventory, stats] = await Promise.all([
-    fetchProducts({ limit: 1 }),
-    fetchAdminOrders({ page: 1 }),
-    fetchInventory({ page: 1 }),
-    fetchOrderStats(grain),
+/**
+ * What this panel is for.
+ *
+ * The shop moved to barbersyndicate.in, so there are no orders, revenue or
+ * stock numbers to report here any more. What's left is the site's own
+ * furniture — the homepage, its videos, and the enquiries the contact form
+ * produces — plus a read-only check that the catalogue this site depends on is
+ * actually answering.
+ */
+export default async function AdminDashboardPage() {
+  const [videos, contact, products] = await Promise.all([
+    fetchVideos({ page: 1 }),
+    fetchContactMessages({ page: 1 }),
+    fetchShopProducts(),
   ]);
 
-  const productCount = products.ok ? products.data.pagination.total : null;
-  const orderCount = orders.ok ? orders.data.pagination.total : null;
-  const awaiting = orders.ok ? orders.data.summary.awaiting_payment : 0;
-  const revenue = orders.ok ? orders.data.summary.paid_revenue : null;
-  const stock = inventory.ok ? inventory.data.summary : null;
+  const videoCount = videos.ok ? videos.data.pagination.total : null;
+  const newEnquiries = contact.ok
+    ? contact.data.messages.filter((message) => message.status === "pending").length
+    : null;
 
   const tiles = [
     {
-      href: "/admin/products",
-      icon: PackageIcon,
-      label: "Products",
-      value: productCount === null ? "—" : String(productCount),
-      description:
-        productCount === null
-          ? "Couldn't reach the catalogue API."
-          : "Live in the catalogue",
+      href: "/admin/customisation",
+      icon: LayoutTemplateIcon,
+      label: "Customisation",
+      value: "Homepage",
+      description: "Announcement, strips, tiles and block order",
     },
     {
-      href: "/admin/orders",
-      icon: ShoppingCartIcon,
-      label: "Orders",
-      value: orderCount === null ? "—" : String(orderCount),
+      href: "/admin/videos",
+      icon: FilmIcon,
+      label: "Videos",
+      value: videoCount === null ? "—" : String(videoCount),
       description:
-        orderCount === null
-          ? "Couldn't reach the orders API."
-          : awaiting > 0
-            ? `${awaiting} awaiting payment`
-            : "All settled",
+        videoCount === null ? "Couldn't reach the API." : "In the hero library",
     },
     {
-      href: "/admin/orders?payment_status=paid",
-      icon: IndianRupeeIcon,
-      label: "Paid revenue",
-      value: revenue === null ? "—" : formatPrice(revenue),
-      description: "Across all paid orders",
-    },
-    {
-      // Deep-links to the filter that matters when something needs reordering.
-      href: stock && stock.low_stock > 0 ? "/admin/inventory?filter=low" : "/admin/inventory",
-      icon: BoxesIcon,
-      label: "Inventory",
-      value: stock === null ? "—" : String(stock.total_units),
+      href: "/admin/queries",
+      icon: InboxIcon,
+      label: "Contact queries",
+      value: newEnquiries === null ? "—" : String(newEnquiries),
       description:
-        stock === null
-          ? "Couldn't reach the inventory API."
-          : stock.low_stock > 0 || stock.out_of_stock > 0
-            ? [
-                stock.low_stock > 0 ? `${stock.low_stock} low` : null,
-                stock.out_of_stock > 0 ? `${stock.out_of_stock} out of stock` : null,
-              ]
-                .filter(Boolean)
-                .join(", ")
-            : "Units across all variants",
+        newEnquiries === null
+          ? "Couldn't reach the API."
+          : newEnquiries > 0
+            ? "Pending a reply"
+            : "Nothing pending",
     },
   ];
 
@@ -89,51 +66,82 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
     <div className="grid gap-6">
       <div>
         <h1 className="font-heading text-2xl tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          An overview of the store.
+        <p className="mt-1 text-sm text-muted-foreground">
+          This site is a landing page. Products, prices and checkout live on
+          Barber Syndicate — everything below is what this site owns.
         </p>
       </div>
 
-      {/*
-        Square stat tiles: aspect-square with a fixed max width, so they stay
-        compact instead of stretching to fill the row. Four across on desktop
-        keeps them beside each other rather than wrapping under the chart.
-      */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
-          <Link
-            key={tile.href}
-            href={tile.href}
-            aria-label={`${tile.label}: ${tile.value}. ${tile.description}`}
-            className="rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {/* Centred cluster rather than pinned top-and-bottom: a square forces
-                more height than this much content needs, and justify-between
-                would leave a void through the middle of every tile. */}
-            <Card className="flex aspect-square flex-col justify-center gap-1 p-4 transition-colors hover:bg-accent/50">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <tile.icon className="size-3.5 shrink-0" />
-                <span className="truncate text-xs">{tile.label}</span>
+          <Link key={tile.href} href={tile.href} className="group">
+            <Card className="h-full gap-0 p-5 transition-colors group-hover:border-foreground/25">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] tracking-[0.16em] text-muted-foreground uppercase">
+                  {tile.label}
+                </span>
+                <tile.icon className="size-4 text-muted-foreground" strokeWidth={1.5} />
               </div>
-
-              {/* Proportional figures — a standalone value, not a column. */}
-              <p className="truncate font-heading text-2xl leading-tight">{tile.value}</p>
-              <p className="line-clamp-2 text-[11px] leading-snug text-muted-foreground">
-                {tile.description}
-              </p>
+              <p className="mt-3 font-heading text-2xl">{tile.value}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{tile.description}</p>
             </Card>
           </Link>
         ))}
       </div>
 
-      {stats.ok ? (
-        <OrderTrendChart stats={stats.data} />
-      ) : (
-        <Alert variant="destructive">
-          <AlertCircleIcon />
-          <AlertDescription>{stats.error}</AlertDescription>
-        </Alert>
-      )}
+      {/*
+        A health check, not a catalogue. If this says anything other than all
+        four, the storefront's product pages are degraded right now and the
+        cause is upstream — this panel can't fix it, but it can stop it being a
+        mystery.
+      */}
+      <Card className="gap-0 p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] tracking-[0.16em] text-muted-foreground uppercase">
+              Catalogue feed
+            </p>
+            <p className="mt-2 text-sm">
+              {products.length === 4 ? (
+                <span className="text-muted-foreground">
+                  All 4 products are resolving from the Barber Syndicate API.
+                </span>
+              ) : (
+                <span className="text-destructive">
+                  Only {products.length} of 4 products resolved — the storefront is
+                  showing an incomplete range.
+                </span>
+              )}
+            </p>
+          </div>
+
+          <a
+            href="https://barbersyndicate.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm underline underline-offset-4"
+          >
+            Storefront
+            <ExternalLinkIcon className="size-3.5" strokeWidth={1.5} />
+          </a>
+        </div>
+
+        {products.length > 0 ? (
+          <ul className="mt-4 grid gap-1.5 border-t pt-4">
+            {products.map((product) => (
+              <li
+                key={product.id}
+                className="flex items-baseline justify-between gap-4 text-sm"
+              >
+                <span className="truncate">{product.name}</span>
+                <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
+                  {product.in_stock ? "in stock" : "out of stock"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </Card>
     </div>
   );
 }

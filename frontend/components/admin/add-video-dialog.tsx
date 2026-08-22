@@ -21,33 +21,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { discardUploads } from "@/lib/media-actions";
 import type { UploadedVideo } from "@/lib/media-upload";
 import { createVideoAction, type VideoResult } from "@/lib/video-actions";
 
-type ProductOption = { id: number; name: string };
-
-type Props = {
-  products: ProductOption[];
-};
-
-const NONE = "";
-
-export function AddVideoDialog({ products }: Props) {
+export function AddVideoDialog() {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<VideoResult | null>(null);
 
-  const [productId, setProductId] = useState(NONE);
   const [active, setActive] = useState(true);
   const [video, setVideo] = useState<UploadedVideo | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -64,7 +48,6 @@ export function AddVideoDialog({ products }: Props) {
 
   function reset({ keepVideo }: { keepVideo: boolean }) {
     formRef.current?.reset();
-    setProductId(NONE);
     setActive(true);
     setResult(null);
 
@@ -94,7 +77,6 @@ export function AddVideoDialog({ products }: Props) {
     startTransition(async () => {
       const response = await createVideoAction({
         title,
-        productId,
         video,
         isActive: active,
       });
@@ -110,9 +92,6 @@ export function AddVideoDialog({ products }: Props) {
     });
   }
 
-  const productName = (id: string) =>
-    products.find((option) => String(option.id) === id)?.name ?? "No product";
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button />}>
@@ -124,8 +103,7 @@ export function AddVideoDialog({ products }: Props) {
         <DialogHeader>
           <DialogTitle className="font-heading">Upload video</DialogTitle>
           <DialogDescription>
-            Where these appear on the storefront hasn&rsquo;t been decided yet — the
-            API serves the active ones whenever it is.
+            The active video with the lowest order becomes the homepage hero.
           </DialogDescription>
         </DialogHeader>
 
@@ -140,28 +118,6 @@ export function AddVideoDialog({ products }: Props) {
             <Label htmlFor="title">Title</Label>
             <Input id="title" name="title" required autoFocus maxLength={180} />
             <FieldError messages={fieldErrors?.title} />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="product">Product</Label>
-            <Select
-              value={productId}
-              onValueChange={(value) => setProductId(String(value))}
-            >
-              <SelectTrigger id="product" className="w-full">
-                {/* Base UI renders the raw value unless given a formatter. */}
-                <SelectValue>{(value) => productName(String(value))}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>No product</SelectItem>
-                {products.map((product) => (
-                  <SelectItem key={product.id} value={String(product.id)}>
-                    {product.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FieldError messages={fieldErrors?.product_id} />
           </div>
 
           <VideoUploadField

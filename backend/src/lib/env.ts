@@ -63,19 +63,9 @@ export const env = {
   IMAGEKIT_PRIVATE_KEY: process.env["IMAGEKIT_PRIVATE_KEY"] ?? "",
   IMAGEKIT_URL_ENDPOINT: (process.env["IMAGEKIT_URL_ENDPOINT"] ?? "").replace(/\/+$/, ""),
 
-  // Razorpay. Live keys arrive once the business is verified on their dashboard;
-  // until then these stay as placeholders and checkout runs in unpaid mode.
-  RAZORPAY_KEY_ID: (process.env["RAZORPAY_KEY_ID"] ?? "").trim(),
-  RAZORPAY_KEY_SECRET: (process.env["RAZORPAY_KEY_SECRET"] ?? "").trim(),
-  RAZORPAY_WEBHOOK_SECRET: (process.env["RAZORPAY_WEBHOOK_SECRET"] ?? "").trim(),
-
-  // How long an unpaid order may hold its stock before the sweeper takes it
-  // back. Long enough for a slow bank page, short enough that abandoned
-  // checkouts don't make the catalogue read as sold out.
-  ORDER_RESERVATION_MINUTES: Math.max(
-    5,
-    Number(process.env["ORDER_RESERVATION_MINUTES"] ?? 30) || 30
-  ),
+  // Razorpay and ORDER_RESERVATION_MINUTES were removed with checkout — this
+  // site takes no payments and holds no stock. They may still be present in an
+  // older .env; nothing reads them.
 
   // SMTP is optional: with no SMTP_HOST the mailer logs to the console instead,
   // so signup can be exercised locally without credentials.
@@ -105,19 +95,6 @@ export const isImageKitConfigured = Boolean(
   env.IMAGEKIT_PUBLIC_KEY && env.IMAGEKIT_PRIVATE_KEY && env.IMAGEKIT_URL_ENDPOINT
 );
 
-
-/**
- * Real Razorpay keys are `rzp_test_…` or `rzp_live_…`. Anything else — blank, or
- * the placeholder shipped in .env.example — means payments aren't live yet, and
- * checkout says so instead of failing at the API call.
- */
-export const isRazorpayConfigured =
-  /^rzp_(test|live)_[A-Za-z0-9]+$/.test(env.RAZORPAY_KEY_ID) &&
-  env.RAZORPAY_KEY_SECRET.length > 8;
-
-/** Webhooks are only trustworthy once a signing secret is set. */
-export const isRazorpayWebhookConfigured =
-  isRazorpayConfigured && env.RAZORPAY_WEBHOOK_SECRET.length > 8;
 
 /**
  * All three are required to actually send. A host without credentials makes
